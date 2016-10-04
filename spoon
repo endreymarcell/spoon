@@ -1,0 +1,36 @@
+#!/bin/sh
+
+usage="Usage: $0 [-i INSTANCE-ID w/o i- prefix] [-n NAME]"
+
+if [[ $# -ne 2 ]]; then
+	echo $usage 1>&2
+	exit 1
+fi
+
+if [[ $1 != "-i" && $1 != "-n" ]]; then
+	echo $usage 1>&2
+	exit 1
+fi
+
+if [[ $1 == '-i' ]]; then
+	NODE=$(aws ec2 describe-instances --instance-ids $2)
+	IP=$(echo $NODE | jq .Reservations[0].Instances[0].PublicIpAddress | sed 's/"//g')
+	ssh -l root $IP
+fi
+
+NODES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$2*")
+# the grepping at the end could probably be done in jq as well but I already don't understand my own jq expression
+NODE_NAMES=$(echo $NODES | jq '.Reservations | map(.Instances[0].Tags | map(select(.Key == "Name").Value))' | grep -v "\[\|\]" | sed "s/\"//g" | xargs)
+
+echo "*) all of the following (csshx)"
+select name in $NODE_NAMES; do NODE=$name; break; done
+
+if [[ $REPLY == '*' ]]; then
+	IPS=$(echo $NODES | jq '.Reservations | map(.Instances[0].PublicIpAddress)' | grep -v "\[\|\]" | sed "s/[\",]//g" | xargs)
+	csshx --login root $IPS
+else
+	(( NODE_INDEX = $REPLY - 1 ))
+	echo $NODE_INDEX
+	IP=$(echo $NODES | jq .Reservations[$NODE_INDEX].Instances[0].PublicIpAddress | sed s/\"//g)
+	ssh -l root $IP
+fi
