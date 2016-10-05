@@ -30,7 +30,6 @@ if [[ $REPLY == '*' ]]; then
 	csshx --login root $IPS
 else
 	(( NODE_INDEX = $REPLY - 1 ))
-	echo $NODE_INDEX
 	IP=$(echo $NODES | jq .Reservations[$NODE_INDEX].Instances[0].PublicIpAddress | sed s/\"//g)
 	ssh -l root $IP
 fi
