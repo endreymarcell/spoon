@@ -15,6 +15,13 @@ if [[ $1 == '-i' ]]; then
 fi
 
 NODES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$2*")
+NODE_NUM=$(echo $NODES | jq '.Reservations | length')
+if [[ $NODE_NUM -eq 1 ]]; then
+	IP=$(echo $NODES | jq .Reservations[0].Instances[0].PublicIpAddress | sed 's/"//g')
+	ssh -l root $IP
+	exit 0
+fi
+
 # the grepping at the end could probably be done in jq as well but I already don't understand my own jq expression
 NODE_NAMES=$(echo $NODES | jq '.Reservations | map(.Instances[0].Tags | map(select(.Key == "Name").Value))' | grep -v "\[\|\]" | sed "s/\"//g" | xargs)
 
