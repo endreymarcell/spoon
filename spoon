@@ -1,25 +1,37 @@
 #!/bin/sh
 
-usage="Usage: $0 [-i INSTANCE-ID] [-n NAME]"
-
-if [[ $# -ne 2 ]] || [[ $1 != "-i" && $1 != "-n" ]]; then
-	echo $usage 1>&2
+if [[ $# -ne 1 ]]; then
+	echo "Usage: $0 [INSTANCE-ID|NAME]"
 	exit 1
 fi
 
-if [[ $1 == '-i' ]]; then
-	NODE=$(aws ec2 describe-instances --instance-ids $(echo "i-$2" | sed s/^i-i-/i-/))
-	IP=$(echo $NODE | jq .Reservations[0].Instances[0].PublicIpAddress | sed 's/"//g')
-	ssh -l root $IP
-	exit 0
-fi
 
-NODES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$2*")
+
+### try instance id first, add i- prefix if missing
+
+NODES=$(aws ec2 describe-instances --instance-ids $(echo "i-$1" | sed s/^i-i-/i-/) 2>/dev/null)
 NODE_NUM=$(echo $NODES | jq '.Reservations | length')
 if [[ $NODE_NUM -eq 1 ]]; then
 	IP=$(echo $NODES | jq .Reservations[0].Instances[0].PublicIpAddress | sed 's/"//g')
 	ssh -l root $IP
 	exit 0
+fi
+
+
+
+### search for name if instance-id yields no results
+
+NODES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1*")
+NODE_NUM=$(echo $NODES | jq '.Reservations | length')
+if [[ $NODE_NUM -eq 1 ]]; then
+	IP=$(echo $NODES | jq .Reservations[0].Instances[0].PublicIpAddress | sed 's/"//g')
+	ssh -l root $IP
+	exit 0
+fi
+
+if [[ $NODE_NUM -eq 0 ]]; then
+	echo "No instances found for $1"
+	exit 1
 fi
 
 # the grepping at the end could probably be done in jq as well but I already don't understand my own jq expression
