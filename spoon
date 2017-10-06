@@ -6,6 +6,7 @@ if [[ $# -ne 1 ]]; then
 fi
 
 
+ORIGINAL_IFS=$IFS
 
 ### try instance id first, add i- prefix if missing
 
@@ -16,7 +17,6 @@ if [[ $NODE_NUM -eq 1 ]]; then
 	ssh -l root $IP
 	exit 0
 fi
-
 
 
 ### search for name if instance-id yields no results
@@ -35,10 +35,13 @@ if [[ $NODE_NUM -eq 0 ]]; then
 fi
 
 # the grepping at the end could probably be done in jq as well but I already don't understand my own jq expression
-NODE_NAMES=$(echo $NODES | jq '.Reservations | map(.Instances[0].Tags | map(select(.Key == "Name").Value))' | grep -v "\[\|\]" | sed "s/\"//g" | xargs)
+NODE_NAMES=$(echo $NODES | jq '.Reservations | map(.Instances[0] | (.Tags | map(select(.Key == "Name").Value))[0] + "__(" + .State.Name + ")")' | grep -v "\[\|\]" | sed "s/\"//g" | xargs)
+IFS="^"
+NODE_NAMES=$(echo $NODE_NAMES | sed 's/ /\^/g' | sed 's/__/ /g')
 
 echo "*) all of the following (csshx)"
-select name in $NODE_NAMES; do NODE=$name; break; done
+select name in $NODE_NAMES; do : ; break; done
+IFS=$ORIGINAL_IFS
 
 if [[ $REPLY == '*' ]]; then
 	IPS=$(echo $NODES | jq '.Reservations | map(.Instances[0].PublicIpAddress)' | grep -v "\[\|\]" | sed "s/[\",]//g" | xargs)
