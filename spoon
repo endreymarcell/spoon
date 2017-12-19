@@ -21,7 +21,7 @@ fi
 
 ### search for name if instance-id yields no results
 
-NODES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=$1*")
+NODES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$1*")
 NODE_NUM=$(echo $NODES | jq '.Reservations | length')
 if [[ $NODE_NUM -eq 1 ]]; then
 	IP=$(echo $NODES | jq .Reservations[0].Instances[0].PublicIpAddress | sed 's/"//g')
