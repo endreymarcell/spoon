@@ -49,5 +49,5 @@ if [[ $REPLY == '*' ]]; then
 else
 	(( NODE_INDEX = $REPLY - 1 ))
 	IP=$(echo $NODES | jq .Reservations[$NODE_INDEX].Instances[0].PublicIpAddress | sed s/\"//g)
-	ssh -l root $IP
+	ssh -o StrictHostKeyChecking=no -l root $IP
 fi
