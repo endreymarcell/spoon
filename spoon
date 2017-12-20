@@ -1,53 +1,137 @@
 #!/bin/sh
 
-if [[ $# -ne 1 ]]; then
-	echo "Usage: $0 [INSTANCE-ID|NAME]"
+usage() {
+  echo 'type `spoon help` for more info'
+}
+
+spoon_help() {
+  echo "spoon - ssh into ec2 instances easily"
+  echo "usage: spoon [-ieo1dv] identifier"
+  echo "options:"
+  echo "  search modifiers:"
+  echo "    -i    use instance id rather than instance name"
+  echo "    -1    use the first instance, even when there are more than one results"
+  echo "    -e    only list preprod instances (if applicable), only works when filtering for name"
+  echo "    -o    only list production nodes (if applicable), only works when filtering for name"
+  echo "  after-search utilities (only for single instances):"
+  echo "    -d    try to log into the docker container on the instance"
+  echo "    -v    try to activate to virtualenv on the instance"
+}
+
+if [[ $# -lt 1 ]]; then
+	usage
 	exit 1
 fi
 
-
-ORIGINAL_IFS=$IFS
-
-### try instance id first, add i- prefix if missing
-
-NODES=$(aws ec2 describe-instances --instance-ids $(echo "i-$1" | sed s/^i-i-/i-/) 2>/dev/null)
-NODE_NUM=$(echo $NODES | jq '.Reservations | length')
-if [[ $NODE_NUM -eq 1 ]]; then
-	IP=$(echo $NODES | jq .Reservations[0].Instances[0].PublicIpAddress | sed 's/"//g')
-	ssh -l root $IP
-	exit 0
+if [[ "$1" == 'help' ]]; then
+  spoon_help
+  exit 0
 fi
 
+ID="${*: -1}"
+USE_INSTANCE_ID=0
+USE_FIRST_INSTANCE=0
+USE_PREPROD=0
+USE_PROD=0
+USE_DOCKER=0
+USE_VENV=0
 
-### search for name if instance-id yields no results
+while getopts "i1eodvs" opt; do
+  case $opt in
+    i)
+      USE_INSTANCE_ID=1
+      ;;
+  	1)
+      USE_FIRST_INSTANCE=1
+      ;;		
+    e)
+      [[ $USE_INSTANCE_ID -eq 0 ]] && USE_PREPROD=1 || echo 'filtering for preprod only works with instance names, not instance ids; ignoring'
+      ;;
+    o)
+      [[ $USE_INSTANCE_ID -eq 0 ]] && USE_PROD=1 || echo 'filtering for preprod only works with instance names, not instance ids; ignoring'
+      ;;
+    d)
+      USE_DOCKER=1
+      ;;
+    v)
+      USE_VENV=1
+      ;;
+    \?)
+      echo "invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+  esac
+done
 
-NODES=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$1*")
-NODE_NUM=$(echo $NODES | jq '.Reservations | length')
-if [[ $NODE_NUM -eq 1 ]]; then
-	IP=$(echo $NODES | jq .Reservations[0].Instances[0].PublicIpAddress | sed 's/"//g')
-	ssh -l root $IP
-	exit 0
-fi
+DOCKER_COMMAND='type docker >/dev/null 2>&1 && sudo docker exec -ti $(sudo docker ps --filter "name=-app-" --format "table {{.ID}}\\t{{.Names}}" | grep -v CONTAINER | awk "{print \$1}") bash || echo "spoon cannot docker"'
 
-if [[ $NODE_NUM -eq 0 ]]; then
-	echo "No instances found for $1"
-	exit 1
-fi
+if [[ $USE_INSTANCE_ID -eq 1 ]]; then
+  INSTANCE_ID=$(echo "i-$ID" | sed s/^i-i-/i-/)
+  NODES=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID 2>/dev/null)
+  NUM_NODES=$(echo $NODES | jq '.Reservations | length')
 
-# the grepping at the end could probably be done in jq as well but I already don't understand my own jq expression
-NODE_NAMES=$(echo $NODES | jq '.Reservations | map(.Instances[0] | (.Tags | map(select(.Key == "Name").Value))[0] + "__" + .PublicIpAddress + "__(" + .State.Name + ")")' | grep -v "\[\|\]" | sed "s/\"//g" | sed "s/,//g"| xargs)
-IFS="^"
-NODE_NAMES=$(echo $NODE_NAMES | sed 's/ /\^/g' | sed 's/__/    /g')
+  if [[ $NUM_NODES -eq 0 ]]; then
+    echo "no instances found for instance id '$ID'"
+    exit 1
+  fi
 
-echo "*) all of the following (csshx)"
-select name in $NODE_NAMES; do : ; break; done
-IFS=$ORIGINAL_IFS
-
-if [[ $REPLY == '*' ]]; then
-	IPS=$(echo $NODES | jq '.Reservations | map(.Instances[0].PublicIpAddress)' | grep -v "\[\|\]" | sed "s/[\",]//g" | xargs)
-	csshx --login root $IPS
+  if [[ $NUM_NODES -eq 1 ]]; then
+    TARGET_IP=$(echo $NODES | jq .Reservations[0].Instances[0].PublicIpAddress | sed 's/"//g')
+  fi
 else
-	(( NODE_INDEX = $REPLY - 1 ))
-	IP=$(echo $NODES | jq .Reservations[$NODE_INDEX].Instances[0].PublicIpAddress | sed s/\"//g)
-	ssh -o StrictHostKeyChecking=no -l root $IP
+  NODE_DETAILS=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$ID*" | jq '.Reservations | map(.Instances[0] | (.Tags | map(select(.Key == "Name").Value))[0] + "__" + .InstanceId + "__" + .PublicIpAddress + "__(" + .State.Name + ")")')
+  FILTERED=$NODE_DETAILS
+  if [[ $USE_PROD -eq 1 ]]; then
+    FILTERED=$(echo $FILTERED | jq . | grep -v '\-pp' | grep -v preprod)
+  elif [[ $USE_PREPROD -eq 1 ]]; then
+    FILTERED=$(echo $FILTERED | jq . | grep '\-\(pp\|preprod\)')
+  fi
+  
+  FILTERED=$(printf "%s\n" $FILTERED | sort | grep -v "\[\|\]" | sed "s/\"//g" | sed "s/,//g")
+  NUM_NODES=$(printf "%s\n" $FILTERED | wc -l)
+  
+  if [[ $NUM_NODES -eq 0 ]]; then
+    echo "no instances found for instance name '$ID'"
+    exit 1
+  fi
+
+  if [[ $NUM_NODES -eq 1 ]] || [[ $USE_FIRST_INSTANCE -eq 1 ]]; then
+    TARGET_IP=$(printf "%s\n" $FILTERED | head -n1 | sed 's/__/  /g' | awk '{print $3}')
+  else
+    NODE_NAMES=$(echo $FILTERED |sed 's/ /\^/g' | sed 's/__/    /g')
+    echo "*) all of the following (csshx)"
+    
+    ORIGINAL_IFS=$IFS
+    IFS="^"
+    select name in $NODE_NAMES; do : ; break; done
+    IFS=$ORIGINAL_IFS
+
+    if [[ $REPLY == '*' ]]; then
+      TARGET_IPS=$(printf "%s\n" $FILTERED | sed 's/__/  /g' | awk '{print $3}' | xargs)
+    else
+      NODE_INDEX=$REPLY
+      TARGET_IP=$(printf "%s\n" $FILTERED | sed -n "${NODE_INDEX}p" | sed 's/__/  /g' | awk '{print $3}')
+    fi
+  fi
+fi
+
+if [[ "$TARGET_IPS" != "" ]]; then
+  csshx --login root $TARGET_IPS
+elif [[ "$TARGET_IP" != "" ]]; then
+  if [[ $USE_DOCKER -eq 1 ]]; then
+    if [[ $USE_VENV -eq 1 ]]; then
+      ssh -o StrictHostKeyChecking=no -l root $TARGET_IP -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
+    else
+      ssh -o StrictHostKeyChecking=no -l root $TARGET_IP -t "hostname; $DOCKER_COMMAND; /bin/bash -l"
+    fi
+  else
+    if [[ $USE_VENV -eq 1 ]]; then
+      ssh -o StrictHostKeyChecking=no -l root $TARGET_IP -t '[[ `which docker` == "" ]] && SERVICE_NAME=`ps aux | grep -v grep | grep gunicorn | grep "opt/prezi" | head -n1 | sed "s~.*/opt/prezi/\(.*\)/\(current\|versions\).*~\1~g"` && cd /opt/prezi/$SERVICE_NAME/current && bash --init-file <(echo "source bin/activate") || echo "cannot activate venv outside of docker" && bash -l'
+    else
+      ssh -o StrictHostKeyChecking=no -l root $TARGET_IP
+    fi
+  fi
+else
+  echo "spoon went tits up"
+  exit 1
 fi

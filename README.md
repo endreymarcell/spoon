@@ -2,31 +2,53 @@
 
 Easily SSH into EC2 nodes.  
 
+## Usage
+
+`spoon [-ieo1dv] identifier`
+
+__search modifiers:__  
+    `-i`    use instance id rather than instance name  
+    `-1`    use the first instance, even when there are more than one results  
+    `-e`    only list preprod instances (if applicable), only works when filtering for name  
+    `-o`    only list production instances (if applicable), only works when filtering for name  
+
+__after-search utilities (only for single instances):__  
+    `-d`    log into the docker container on the instance  
+    `-v`    activate to virtualenv on the instance  
+
+Typing `spoon help` will also list these options.  
+
 ## Examples
 
-ssh to node by instance id
+List all signup instances:  
 ```bash
-$ spoon 0ea4c7af85f59d112
-[your-app-i-0ea4c7af85f59d112.ec2-us-east-1c:~] $
+$ spoon signup
 ```
 
-ssh to node by name (single hit)
+List all preprod tokenbroker instances:  
 ```bash
-$ spoon legacy
-[legacy-logshipping-i-067d5a13188861066.ec2-us-east-1a:~] $
+$ spoon -e tokenbr
 ```
 
-ssh to node by name (multiple hits)
+Directly log into the first available production licenseprovisioning instance:  
+```bash
+$ spoon -1o provi
 ```
-$ spoon muladmin
-*) all of the following (csshx)
-1) muladminapp-app (running),         3) muladminapp-app (running),
-2) muladminapp-app (running),         4) muladminapp-app-preprod (running)
-#? 4
-[muladminapp-app-preprod-i-a4c6dd4a.ec2-us-east-1e:~] $
-``` 
 
-## Usage
-`spoon [identifier]`  
-where identifier is either (a part of) the instance name, or the AWS instance ID (with or without the i- prefix).  
-If only one instance matches, spoon instantiates the ssh connection directly. If more than one instances are found, spoon presents you with the list, where you can either choose a specific instance, or csshx into all of them.  
+Directly log into the first available authservice instance and activate the virtualenv:  
+```bash
+$ spoon -1v tationser
+```
+_Note: the names of "presentationservice" and "presentationcontentservice" share a long prefix, therefore I typed the middle of the name to get an unambigious identifier with only a couple of characters._  
+
+List all preprod socialauthservice instances, select one, log in and enter the docker container:  
+```bash
+$ spoon -ed sociala
+```
+_Note: please keep in mind that since your search term will be insterted between catch-all wildcards, searching for `authservice` will also bring up `socialauthservice` instances._  
+
+Directly log in to the first available production liveprezi instance, enter docker and activate the virtualenv:  
+```bash
+$ spoon -1odv livepre
+```
+
