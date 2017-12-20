@@ -6,7 +6,7 @@ usage() {
 
 spoon_help() {
   echo "spoon - ssh into ec2 instances easily"
-  echo "usage: spoon [-ieo1dvs] identifier"
+  echo "usage: spoon [-ieo1dv] identifier"
   echo "options:"
   echo "  search modifiers:"
   echo "    -i    use instance id rather than instance name"
@@ -16,7 +16,6 @@ spoon_help() {
   echo "  after-search utilities (only for single instances):"
   echo "    -d    try to log into the docker container on the instance"
   echo "    -v    try to activate to virtualenv on the instance"
-  echo "    -s    try to start the django shell on the instance"
 }
 
 if [[ $# -lt 1 ]]; then
@@ -36,7 +35,6 @@ USE_PREPROD=0
 USE_PROD=0
 USE_DOCKER=0
 USE_VENV=0
-USE_SHELL=0
 
 while getopts "i1eodvs" opt; do
   case $opt in
@@ -57,9 +55,6 @@ while getopts "i1eodvs" opt; do
       ;;
     v)
       USE_VENV=1
-      ;;
-    s)
-      USE_DJANGO_SHELL=1
       ;;
     \?)
       echo "invalid option: -$OPTARG" >&2
