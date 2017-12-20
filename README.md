@@ -4,7 +4,7 @@ Easily SSH into EC2 nodes.
 
 ## Usage
 
-`spoon [-ieo1dvs] identifier`
+`spoon [-ieo1dv] identifier`
 
 __search modifiers:__  
     `-i`    use instance id rather than instance name  
@@ -15,6 +15,8 @@ __search modifiers:__
 __after-search utilities (only for single instances):__  
     `-d`    log into the docker container on the instance  
     `-v`    activate to virtualenv on the instance  
+
+Typing `spoon help` will also list these options.  
 
 ## Examples
 
