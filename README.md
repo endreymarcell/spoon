@@ -2,6 +2,13 @@
 
 Easily SSH into EC2 nodes.  
 
+## Installation
+
+```
+brew tap endreymarcell/homebrew-marca
+brew install spoon
+```
+
 ## Usage
 
 `spoon [-ieo1dv] identifier`
