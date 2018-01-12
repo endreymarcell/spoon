@@ -6,7 +6,7 @@ usage() {
 
 spoon_help() {
   echo "spoon - ssh into ec2 instances easily"
-  echo "usage: spoon [-ieo1dv] identifier"
+  echo "usage: spoon [-ieo1dv] identifier,identifier,..."
   echo "options:"
   echo "  search modifiers:"
   echo "    -i    use instance id rather than instance name"
@@ -108,6 +108,15 @@ else
 
     if [[ $REPLY == '*' ]]; then
       TARGET_IPS=$(printf "%s\n" $FILTERED | sed 's/__/  /g' | awk '{print $3}' | xargs)
+    elif [[ $REPLY == *','* ]]; then
+      ALL_IPS=$(printf "%s\n" $FILTERED | sed 's/__/  /g' | awk '{print $3}' | xargs)
+      ORIGINAL_IFS=$IFS
+      IFS=" " read -r -a ALL_IPS <<< "${ALL_IPS}"
+      IFS="," read -r -a SELECTED_NODES <<< "${REPLY}"
+      IFS=$ORIGINAL_IFS
+      for SELECTED_NODE_IDX in ${SELECTED_NODES[@]}; do
+        TARGET_IPS="${TARGET_IPS} ${ALL_IPS[SELECTED_NODE_IDX-1]}"
+      done
     else
       NODE_INDEX=$REPLY
       TARGET_IP=$(printf "%s\n" $FILTERED | sed -n "${NODE_INDEX}p" | sed 's/__/  /g' | awk '{print $3}')
