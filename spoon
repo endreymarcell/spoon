@@ -6,7 +6,7 @@ usage() {
 
 spoon_help() {
   echo "spoon - ssh into ec2 instances easily"
-  echo "usage: spoon [-ieo1dv] identifier,identifier,..."
+  echo "usage: spoon [-ieo1dv] identifier"
   echo "options:"
   echo "  search modifiers:"
   echo "    -i    use instance id rather than instance name"
