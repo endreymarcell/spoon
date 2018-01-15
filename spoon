@@ -104,10 +104,32 @@ else
     ORIGINAL_IFS=$IFS
     IFS="^"
     select name in $NODE_NAMES; do : ; break; done
+
+    ALL_IPS=$(printf "%s\n" $FILTERED | sed 's/__/  /g' | awk '{print $3}' | xargs)
+    IFS=" " read -r -a ALL_IPS <<< "${ALL_IPS}"
     IFS=$ORIGINAL_IFS
 
     if [[ $REPLY == '*' ]]; then
       TARGET_IPS=$(printf "%s\n" $FILTERED | sed 's/__/  /g' | awk '{print $3}' | xargs)
+    elif [[ $REPLY == *','* ]]; then
+      ORIGINAL_IFS=$IFS; IFS="," read -r -a SELECTED_NODES <<< "${REPLY}" ; IFS=$ORIGINAL_IFS
+      for SELECTED_NODE_IDX in ${SELECTED_NODES[@]}; do
+        if [[ ${SELECTED_NODE_IDX} =~ \d*-\d* ]]; then
+          LOWER_LIMIT=$(awk -F '-' '{print $1}' <<< ${SELECTED_NODE_IDX})
+          UPPER_LIMIT=$(awk -F '-' '{print $2}' <<< ${SELECTED_NODE_IDX})
+          for _SELECTED_NODE_IDX in $(seq ${LOWER_LIMIT} ${UPPER_LIMIT}); do
+            TARGET_IPS="${TARGET_IPS} ${ALL_IPS[_SELECTED_NODE_IDX-1]}"
+          done
+        else
+          TARGET_IPS="${TARGET_IPS} ${ALL_IPS[SELECTED_NODE_IDX-1]}"
+        fi
+      done
+    elif [[ $REPLY =~ \d*-\d* ]]; then
+      LOWER_LIMIT=$(awk -F '-' '{print $1}' <<< ${REPLY})
+      UPPER_LIMIT=$(awk -F '-' '{print $2}' <<< ${REPLY})
+      for SELECTED_NODE_IDX in $(seq ${LOWER_LIMIT} ${UPPER_LIMIT}); do
+        TARGET_IPS="${TARGET_IPS} ${ALL_IPS[SELECTED_NODE_IDX-1]}"
+      done
     else
       NODE_INDEX=$REPLY
       TARGET_IP=$(printf "%s\n" $FILTERED | sed -n "${NODE_INDEX}p" | sed 's/__/  /g' | awk '{print $3}')
