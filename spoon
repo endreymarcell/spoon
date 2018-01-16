@@ -1,10 +1,10 @@
 #!/bin/sh
 
-usage() {
+print_usage() {
   echo 'type `spoon help` for more info'
 }
 
-spoon_help() {
+print_help() {
   echo "spoon - ssh into ec2 instances easily"
   echo "usage: spoon [-ieo1dv] identifier"
   echo "options:"
@@ -19,12 +19,12 @@ spoon_help() {
 }
 
 if [[ $# -lt 1 ]]; then
-	usage
+	print_usage
 	exit 1
 fi
 
 if [[ "$1" == 'help' ]]; then
-  spoon_help
+  print_help
   exit 0
 fi
 
