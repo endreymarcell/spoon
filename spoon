@@ -99,7 +99,7 @@ else
     TARGET_IP=$(printf "%s\n" $FILTERED | head -n1 | sed 's/__/  /g' | awk '{print $3}')
   else
     NODE_NAMES=$(echo $FILTERED |sed 's/ /\^/g' | sed 's/__/    /g')
-    echo "*) all of the following (csshx)"
+    echo "*) all of the following (csshx/i2cssh)"
     
     ORIGINAL_IFS=$IFS
     IFS="^"
@@ -138,7 +138,12 @@ else
 fi
 
 if [[ "$TARGET_IPS" != "" ]]; then
-  csshx --login root $TARGET_IPS
+  if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+    i2cssh --login root $TARGET_IPS
+    echo "hint: press Cmd+Shift+I to send your keyboard input to all the instances"
+  else
+    csshx --login root $TARGET_IPS
+  fi
 elif [[ "$TARGET_IP" != "" ]]; then
   if [[ $USE_DOCKER -eq 1 ]]; then
     if [[ $USE_VENV -eq 1 ]]; then
