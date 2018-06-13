@@ -36,14 +36,6 @@ USE_PROD=0
 USE_DOCKER=0
 USE_VENV=0
 
-use_preprod() {
-  [[ $USE_INSTANCE_ID -eq 0 ]] && USE_PREPROD=1 || echo 'filtering for preprod only works with instance names, not instance ids; ignoring'
-}
-
-use_prod() {
-  [[ $USE_INSTANCE_ID -eq 0 ]] && USE_PROD=1 || echo 'filtering for preprod only works with instance names, not instance ids; ignoring'
-}
-
 while getopts "i1epoPdvs" opt; do
   case $opt in
     i)
@@ -52,17 +44,11 @@ while getopts "i1epoPdvs" opt; do
   	1)
       USE_FIRST_INSTANCE=1
       ;;		
-    e)
-      use_preprod
+    [ep])
+      [[ $USE_INSTANCE_ID -eq 0 ]] && USE_PREPROD=1 || echo 'filtering for preprod only works with instance names, not instance ids; ignoring'
       ;;
-    p)
-      use_preprod
-      ;;
-    o)
-      use_prod
-      ;;
-    P)
-      use_prod
+    [oP])
+      [[ $USE_INSTANCE_ID -eq 0 ]] && USE_PROD=1 || echo 'filtering for preprod only works with instance names, not instance ids; ignoring'
       ;;
     d)
       USE_DOCKER=1
