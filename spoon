@@ -9,13 +9,13 @@ print_help() {
   echo "usage: spoon [-ieo1dv] identifier"
   echo "options:"
   echo "  search modifiers:"
-  echo "    -i    use instance id rather than instance name"
-  echo "    -1    use the first instance, even when there are more than one results"
-  echo "    -e    only list preprod instances (if applicable), only works when filtering for name"
-  echo "    -o    only list production nodes (if applicable), only works when filtering for name"
+  echo "    -i       use instance id rather than instance name"
+  echo "    -1       use the first instance, even when there are more than one results"
+  echo "    -p, -e   only list preprod instances (if applicable), only works when filtering for name"
+  echo "    -P, -o   only list production nodes (if applicable), only works when filtering for name"
   echo "  after-search utilities (only for single instances):"
-  echo "    -d    try to log into the docker container on the instance"
-  echo "    -v    try to activate to virtualenv on the instance"
+  echo "    -d       try to log into the docker container on the instance"
+  echo "    -v       try to activate to virtualenv on the instance"
 }
 
 if [[ $# -lt 1 ]]; then
@@ -36,7 +36,7 @@ USE_PROD=0
 USE_DOCKER=0
 USE_VENV=0
 
-while getopts "i1eodvs" opt; do
+while getopts "i1epoPdvs" opt; do
   case $opt in
     i)
       USE_INSTANCE_ID=1
@@ -44,10 +44,10 @@ while getopts "i1eodvs" opt; do
   	1)
       USE_FIRST_INSTANCE=1
       ;;		
-    e)
+    [ep])
       [[ $USE_INSTANCE_ID -eq 0 ]] && USE_PREPROD=1 || echo 'filtering for preprod only works with instance names, not instance ids; ignoring'
       ;;
-    o)
+    [oP])
       [[ $USE_INSTANCE_ID -eq 0 ]] && USE_PROD=1 || echo 'filtering for preprod only works with instance names, not instance ids; ignoring'
       ;;
     d)
@@ -99,7 +99,7 @@ else
     TARGET_IP=$(printf "%s\n" $FILTERED | head -n1 | sed 's/__/  /g' | awk '{print $3}')
   else
     NODE_NAMES=$(echo $FILTERED |sed 's/ /\^/g' | sed 's/__/    /g')
-    echo "*) all of the following (csshx)"
+    echo "*) all of the following (csshx/i2cssh)"
     
     ORIGINAL_IFS=$IFS
     IFS="^"
@@ -138,7 +138,12 @@ else
 fi
 
 if [[ "$TARGET_IPS" != "" ]]; then
-  csshx --login root $TARGET_IPS
+  if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+    i2cssh --login root $TARGET_IPS
+    echo "hint: press Cmd+Shift+I to send your keyboard input to all the instances"
+  else
+    csshx --login root $TARGET_IPS
+  fi
 elif [[ "$TARGET_IP" != "" ]]; then
   if [[ $USE_DOCKER -eq 1 ]]; then
     if [[ $USE_VENV -eq 1 ]]; then
