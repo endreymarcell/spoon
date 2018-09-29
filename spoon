@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+print_help() {
+  echo "spoon - ssh into ec2 instances easily"
+  echo "usage: spoon identifier"
+}
+
 has_short_flag() {
 	flag="$1"
 	shift
@@ -24,5 +29,20 @@ has_long_flag() {
 	return 1
 }
 
-echo spoon went tits up
-exit 1
+################################################
+################################################
+################################################
+
+if [[ $# -lt 1 ]]; then
+	print_help
+	exit 1
+fi
+
+if has_short_flag h "$@" || has_long_flag 'help' "$@"; then
+  print_help
+  exit 0
+fi
+
+specifier="${*: -1}"
+
+aws ec2 describe-instances --filters "Name=tag:Name,Values=*$specifier*" | jq '.Reservations | map(.Instances[0] | (.Tags | map(select(.Key == "Name").Value))[0] + "__" + .InstanceId + "__" + .PublicIpAddress + "__(" + .State.Name + ")")'

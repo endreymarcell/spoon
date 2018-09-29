@@ -2,8 +2,17 @@
 
 spoon="$BATS_TEST_DIRNAME/../spoon"
 
+aws() {
+	touch trallalla
+}
+
 @test "tests are running" {
   run $spoon
   [ "$status" -eq 1 ]
-  [ "$output" = "spoon went tits up" ]
+}
+
+@test "I can mock external calls" {
+  export -f aws
+	run $spoon soci
+  [ "$status" -eq 0 ]
 }
