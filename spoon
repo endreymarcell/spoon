@@ -1,4 +1,28 @@
 #!/usr/bin/env bash
 
+has_short_flag() {
+	flag="$1"
+	shift
+	args="$@"
+	for arg in $args; do
+		if [ "${arg:0:1}" = - ] && [ "${arg:1:1}" != - ] && [[ "$arg" =~ "$flag" ]]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+has_long_flag() {
+	flag="$1"
+	shift
+	args="$@"
+	for arg in $args; do
+		if [ "${arg:0:2}" = -- ] && [[ "$arg" == --"$flag" ]]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
 echo spoon went tits up
 exit 1
