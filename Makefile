@@ -1,7 +1,7 @@
 .PHONY: test lint
 
 test:
-	bats test/test.bats
+	bats test/*.bats
 
 lint:
 	shellcheck spoon
