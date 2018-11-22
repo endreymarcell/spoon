@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 print_help() {
-  echo "spoon - ssh into ec2 instances easily"
-  echo "usage: spoon identifier"
+	echo "spoon - ssh into ec2 instances easily"
+	echo "usage: spoon <identifier>"
 }
 
 has_short_flag() {
@@ -29,6 +29,18 @@ has_long_flag() {
 	return 1
 }
 
+query_aws() {
+	aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}"
+}
+
+query_aws_by_name() {
+	query_aws --filters "Name=tag:Name,Values=*$1*"
+}
+
+query_aws_by_id() {
+	query_aws --instance-ids "$1"
+}
+
 ################################################
 ################################################
 ################################################
@@ -39,10 +51,21 @@ if [[ $# -lt 1 ]]; then
 fi
 
 if has_short_flag h "$@" || has_long_flag 'help' "$@"; then
-  print_help
-  exit 0
+	print_help
+	exit 0
+fi
+
+if has_short_flag i "$@" || has_long_flag 'instance-id' "$@"; then
+	use_instance_id=1
+else
+	use_instance_id=0
 fi
 
 specifier="${*: -1}"
+if [[ $use_instance_id = 1 ]]; then
+	aws_response=$(query_aws_by_id $specifier)
+else
+	aws_response=$(query_aws_by_name $specifier)
+fi
 
-aws ec2 describe-instances --filters "Name=tag:Name,Values=*$specifier*" | jq '.Reservations | map(.Instances[0] | (.Tags | map(select(.Key == "Name").Value))[0] + "__" + .InstanceId + "__" + .PublicIpAddress + "__(" + .State.Name + ")")'
+echo "$aws_response"
