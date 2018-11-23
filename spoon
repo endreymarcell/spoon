@@ -29,6 +29,10 @@ has_long_flag() {
 	return 1
 }
 
+################################################
+################################################
+################################################
+
 query_aws() {
 	aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}"
 }
@@ -39,6 +43,19 @@ query_aws_by_name() {
 
 query_aws_by_id() {
 	query_aws --instance-ids "$1"
+}
+
+################################################
+################################################
+################################################
+
+ssh_multiple() {
+	if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+	    i2cssh --login root $1
+	    echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
+	else
+	    csshx --login root $1
+	fi
 }
 
 ################################################
@@ -61,11 +78,39 @@ else
 	use_instance_id=0
 fi
 
-specifier="${*: -1}"
-if [[ $use_instance_id = 1 ]]; then
-	aws_response=$(query_aws_by_id $specifier)
+if has_short_flag p "$@" || has_long_flag 'preprod' "$@"; then
+	only_preprod=1
 else
-	aws_response=$(query_aws_by_name $specifier)
+	only_preprod=0
 fi
 
-echo "$aws_response"
+if has_short_flag P "$@" || has_long_flag 'prod' "$@"; then
+	only_prod=1
+else
+	only_prod=0
+fi
+
+specifier="${*: -1}"
+if [[ $use_instance_id = 1 ]]; then
+	nodes=$(query_aws_by_id $specifier)
+else
+	nodes=$(query_aws_by_name $specifier)
+fi
+
+if [[ $only_preprod = 1 ]]; then
+	nodes=$(echo ${nodes} | jq 'map(select(.service | test("preprod|-pp")))')
+elif [[ $only_prod = 1 ]]; then
+	nodes=$(echo ${nodes} | jq 'map(select(.service | test("preprod|-pp") | not))')
+fi
+
+node_count=$(echo "${nodes}" | jq '. | length')
+if [[ "${node_count}" -eq 0 ]]; then
+	echo No node found for this identifier.
+	exit 1
+elif [[ "${node_count}" -gt 1 ]]; then
+	ips=$(echo "${nodes}" | jq '.[].ip' | tr -d '"' | xargs)
+	ssh_multiple "${ips}"
+else
+	ip=$(echo "${nodes}" | jq '.[0].ip' | tr -d '"')
+	ssh -o StrictHostKeyChecking=no -l root  "${ip}"
+fi
