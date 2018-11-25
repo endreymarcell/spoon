@@ -1,19 +1,8 @@
 #!/usr/bin/env bats
 
 spoon="$BATS_TEST_DIRNAME/../spoon"
-load "$BATS_TEST_DIRNAME/mocks.sh"
-
-setup() {
-	export -f aws ssh csshx i2cssh
-}
-
-teardown() {
-	rm -f aws_called ssh_called csshx_called i2cssh_called
-}
-
-debug() {
-	echo "# ${@}" 1>&3
-}
+load "$BATS_TEST_DIRNAME/environment.sh"
+load "/usr/local/lib/bats-mock.bash"
 
 @test "If called without arguments, spoon should print the help text and exit with 1." {
 	run $spoon
@@ -35,5 +24,5 @@ debug() {
 
 @test "If called with an identifier, spoon should query aws." {
 	run $spoon foo
-	[ -f aws_called ]
+	[ "$(mock_get_call_num $(cat mock_aws_path))" -eq 1 ]
 }
