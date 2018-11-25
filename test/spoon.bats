@@ -7,6 +7,10 @@ setup() {
 	export -f aws ssh csshx i2cssh
 }
 
+teardown() {
+	rm -f aws_called ssh_called csshx_called i2cssh_called
+}
+
 debug() {
 	echo "# ${@}" 1>&3
 }
@@ -29,3 +33,7 @@ debug() {
 	[ "$output" = "identifier must not be empty" ]
 }
 
+@test "If called with an identifier, spoon should query aws." {
+	run $spoon foo
+	[ -f aws_called ]
+}
