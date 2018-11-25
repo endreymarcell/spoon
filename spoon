@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 print_help() {
-	echo "spoon - ssh into ec2 instances easily"
-	echo "usage: spoon <identifier>"
+	echo "usage: spoon [flags] <identifier>"
 }
 
 has_short_flag() {
@@ -49,7 +48,28 @@ query_aws_by_id() {
 ################################################
 ################################################
 
+spoon_ssh() {
+	nodes="$1"
+	node_count=$(echo "${nodes}" | jq '. | length')
+	if [[ "${node_count}" -eq 0 ]]; then
+		echo No node found for this identifier.
+		exit 1
+	elif [[ "${node_count}" -gt 1 ]]; then
+		ips=$(echo "${nodes}" | jq '.[].ip' | tr -d '"' | xargs)
+		ssh_multiple "${ips}"
+	else
+		ip=$(echo "${nodes}" | jq '.[0].ip' | tr -d '"')
+		ssh_single -o StrictHostKeyChecking=no -l root  "${ip}"
+	fi
+}
+
+ssh_single() {
+	[[ "${dry_run}" = 1 ]] && exit 0
+	ssh "${@}"
+}
+
 ssh_multiple() {
+	[[ "${dry_run}" = 1 ]] && exit 0
 	if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
 	    i2cssh --login root $1
 	    echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
@@ -67,35 +87,41 @@ if [[ $# -lt 1 ]]; then
 	exit 1
 fi
 
-if has_short_flag h "$@" || has_long_flag 'help' "$@"; then
+if has_short_flag h "$@" || has_long_flag help "$@"; then
 	print_help
 	exit 0
 fi
 
-if has_short_flag i "$@" || has_long_flag 'instance-id' "$@"; then
-	use_instance_id=1
-else
-	use_instance_id=0
+identifier="${*: -1}"
+
+if [[ "${identifier}" =~ ^- ]]; then
+	echo identifier must not be empty
+	exit 1
 fi
 
-if has_short_flag p "$@" || has_long_flag 'preprod' "$@"; then
-	only_preprod=1
-else
-	only_preprod=0
+if has_short_flag i "$@" || has_long_flag instance-id "$@"; then use_instance_id=1; else use_instance_id=0; fi
+if has_short_flag p "$@" || has_long_flag preprod "$@"; then only_preprod=1; else only_preprod=0; fi
+if has_short_flag P "$@" || has_long_flag prod "$@"; then only_prod=1; else only_prod=0; fi
+if has_short_flag 1 "$@" || has_long_flag first "$@"; then use_first=1; else use_first=0; fi
+if has_short_flag v "$@" || has_long_flag verbose "$@"; then verbose=1; else verbose=0; fi
+if has_short_flag d "$@" || has_long_flag dry-run "$@"; then dry_run=1; else dry_run=0; fi
+
+if [[ "${verbose}" = 1 ]]; then
+	echo "spoon identifier=${identifier}"
+	echo "spoon use_instance_id=${use_instance_id}"
+	echo "spoon only_preprod=${only_preprod}"
+	echo "spoon only_prod=${only_prod}"
+	echo "spoon use_first=${use_first}"
+	echo "spoon dry_run=${dry_run}"
 fi
 
-if has_short_flag P "$@" || has_long_flag 'prod' "$@"; then
-	only_prod=1
-else
-	only_prod=0
-fi
-
-specifier="${*: -1}"
 if [[ $use_instance_id = 1 ]]; then
-	nodes=$(query_aws_by_id $specifier)
+	nodes=$(query_aws_by_id $identifier)
 else
-	nodes=$(query_aws_by_name $specifier)
+	nodes=$(query_aws_by_name $identifier)
 fi
+
+[[ "${verbose}" = 1 ]] && echo "spoon nodes returned from aws: ${nodes}"
 
 if [[ $only_preprod = 1 ]]; then
 	nodes=$(echo ${nodes} | jq 'map(select(.service | test("preprod|-pp")))')
@@ -103,14 +129,12 @@ elif [[ $only_prod = 1 ]]; then
 	nodes=$(echo ${nodes} | jq 'map(select(.service | test("preprod|-pp") | not))')
 fi
 
-node_count=$(echo "${nodes}" | jq '. | length')
-if [[ "${node_count}" -eq 0 ]]; then
-	echo No node found for this identifier.
-	exit 1
-elif [[ "${node_count}" -gt 1 ]]; then
-	ips=$(echo "${nodes}" | jq '.[].ip' | tr -d '"' | xargs)
-	ssh_multiple "${ips}"
-else
-	ip=$(echo "${nodes}" | jq '.[0].ip' | tr -d '"')
-	ssh -o StrictHostKeyChecking=no -l root  "${ip}"
+if [ "${verbose}" = 1 -a $only_prod = 1 ]; then
+	echo "spoon nodes after filtering for prod/preprod: ${nodes}"
 fi
+
+if [[ $use_first = 1 ]]; then
+	nodes=$(echo "${nodes}" | jq '[.[0]]')
+fi
+
+spoon_ssh "${nodes}"
