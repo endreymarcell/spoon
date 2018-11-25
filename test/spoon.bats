@@ -1,6 +1,5 @@
 #!/usr/bin/env bats
 
-spoon="$BATS_TEST_DIRNAME/../spoon"
 load "$BATS_TEST_DIRNAME/environment.sh"
 load "/usr/local/lib/bats-mock.bash"
 
@@ -24,5 +23,5 @@ load "/usr/local/lib/bats-mock.bash"
 
 @test "If called with an identifier, spoon should query aws." {
 	run $spoon foo
-	[ "$(mock_get_call_num $(cat mock_aws_path))" -eq 1 ]
+	[ $(mock_get_call_num $mock_aws_path) -eq 1 ]
 }
