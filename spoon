@@ -1,164 +1,140 @@
-#!/bin/sh
-
-print_usage() {
-  echo 'type `spoon help` for more info'
-}
+#!/usr/bin/env bash
 
 print_help() {
-  echo "spoon - ssh into ec2 instances easily"
-  echo "usage: spoon [-ieo1dv] identifier"
-  echo "options:"
-  echo "  search modifiers:"
-  echo "    -i       use instance id rather than instance name"
-  echo "    -1       use the first instance, even when there are more than one results"
-  echo "    -p, -e   only list preprod instances (if applicable), only works when filtering for name"
-  echo "    -P, -o   only list production nodes (if applicable), only works when filtering for name"
-  echo "  after-search utilities (only for single instances):"
-  echo "    -d       try to log into the docker container on the instance"
-  echo "    -v       try to activate to virtualenv on the instance"
+	echo "usage: spoon [flags] <identifier>"
 }
 
+has_short_flag() {
+	flag="$1"
+	shift
+	args="$@"
+	for arg in $args; do
+		if [ "${arg:0:1}" = - ] && [ "${arg:1:1}" != - ] && [[ "$arg" =~ "$flag" ]]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+has_long_flag() {
+	flag="$1"
+	shift
+	args="$@"
+	for arg in $args; do
+		if [ "${arg:0:2}" = -- ] && [[ "$arg" == --"$flag" ]]; then
+			return 0
+		fi
+	done
+	return 1
+}
+
+################################################
+################################################
+################################################
+
+query_aws() {
+	aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}"
+}
+
+query_aws_by_name() {
+	query_aws --filters "Name=tag:Name,Values=*$1*"
+}
+
+query_aws_by_id() {
+	query_aws --instance-ids "$1"
+}
+
+################################################
+################################################
+################################################
+
+spoon_ssh() {
+	nodes="$1"
+	node_count=$(echo "${nodes}" | jq '. | length')
+	if [[ "${node_count}" -eq 0 ]]; then
+		echo No node found for this identifier.
+		exit 1
+	elif [[ "${node_count}" -gt 1 ]]; then
+		ips=$(echo "${nodes}" | jq '.[].ip' | tr -d '"' | xargs)
+		ssh_multiple "${ips}"
+	else
+		ip=$(echo "${nodes}" | jq '.[0].ip' | tr -d '"')
+		ssh_single -o StrictHostKeyChecking=no -l root  "${ip}"
+	fi
+}
+
+ssh_single() {
+	[[ "${dry_run}" = 1 ]] && exit 0
+	ssh "${@}"
+}
+
+ssh_multiple() {
+	[[ "${dry_run}" = 1 ]] && exit 0
+	if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+	    i2cssh --login root $1
+	    echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
+	else
+	    csshx --login root $1
+	fi
+}
+
+################################################
+################################################
+################################################
+
 if [[ $# -lt 1 ]]; then
-	print_usage
+	print_help
 	exit 1
 fi
 
-if [[ "$1" == 'help' ]]; then
-  print_help
-  exit 0
+if has_short_flag h "$@" || has_long_flag help "$@"; then
+	print_help
+	exit 0
 fi
 
-ID="${*: -1}"
-USE_INSTANCE_ID=0
-USE_FIRST_INSTANCE=0
-USE_PREPROD=0
-USE_PROD=0
-USE_DOCKER=0
-USE_VENV=0
+identifier="${*: -1}"
 
-while getopts "i1epoPdvs" opt; do
-  case $opt in
-    i)
-      USE_INSTANCE_ID=1
-      ;;
-  	1)
-      USE_FIRST_INSTANCE=1
-      ;;		
-    [ep])
-      [[ $USE_INSTANCE_ID -eq 0 ]] && USE_PREPROD=1 || echo 'filtering for preprod only works with instance names, not instance ids; ignoring'
-      ;;
-    [oP])
-      [[ $USE_INSTANCE_ID -eq 0 ]] && USE_PROD=1 || echo 'filtering for preprod only works with instance names, not instance ids; ignoring'
-      ;;
-    d)
-      USE_DOCKER=1
-      ;;
-    v)
-      USE_VENV=1
-      ;;
-    \?)
-      echo "invalid option: -$OPTARG" >&2
-      exit 1
-      ;;
-  esac
-done
+if [[ "${identifier}" =~ ^- ]]; then
+	echo identifier must not be empty
+	exit 1
+fi
 
-DOCKER_COMMAND='type docker >/dev/null 2>&1 && sudo docker exec -ti $(sudo docker ps --filter "name=-app-" --format "table {{.ID}}\\t{{.Names}}" | grep -v CONTAINER | awk "{print \$1}") bash || echo "spoon cannot docker"'
+if has_short_flag i "$@" || has_long_flag instance-id "$@"; then use_instance_id=1; else use_instance_id=0; fi
+if has_short_flag p "$@" || has_long_flag preprod "$@"; then only_preprod=1; else only_preprod=0; fi
+if has_short_flag P "$@" || has_long_flag prod "$@"; then only_prod=1; else only_prod=0; fi
+if has_short_flag 1 "$@" || has_long_flag first "$@"; then use_first=1; else use_first=0; fi
+if has_short_flag v "$@" || has_long_flag verbose "$@"; then verbose=1; else verbose=0; fi
+if has_short_flag d "$@" || has_long_flag dry-run "$@"; then dry_run=1; else dry_run=0; fi
 
-if [[ $USE_INSTANCE_ID -eq 1 ]]; then
-  INSTANCE_ID=$(echo "i-$ID" | sed s/^i-i-/i-/)
-  NODES=$(aws ec2 describe-instances --instance-ids $INSTANCE_ID 2>/dev/null)
-  NUM_NODES=$(echo $NODES | jq '.Reservations | length')
+if [[ "${verbose}" = 1 ]]; then
+	echo "spoon identifier=${identifier}"
+	echo "spoon use_instance_id=${use_instance_id}"
+	echo "spoon only_preprod=${only_preprod}"
+	echo "spoon only_prod=${only_prod}"
+	echo "spoon use_first=${use_first}"
+	echo "spoon dry_run=${dry_run}"
+fi
 
-  if [[ $NUM_NODES -eq 0 ]]; then
-    echo "no instances found for instance id '$ID'"
-    exit 1
-  fi
-
-  if [[ $NUM_NODES -eq 1 ]]; then
-    TARGET_IP=$(echo $NODES | jq .Reservations[0].Instances[0].PublicIpAddress | sed 's/"//g')
-  fi
+if [[ $use_instance_id = 1 ]]; then
+	nodes=$(query_aws_by_id $identifier)
 else
-  NODE_DETAILS=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=*$ID*" | jq '.Reservations | map(.Instances[0] | (.Tags | map(select(.Key == "Name").Value))[0] + "__" + .InstanceId + "__" + .PublicIpAddress + "__(" + .State.Name + ")")')
-  FILTERED=$NODE_DETAILS
-  if [[ $USE_PROD -eq 1 ]]; then
-    FILTERED=$(echo $FILTERED | jq . | grep -v '\-pp' | grep -v preprod)
-  elif [[ $USE_PREPROD -eq 1 ]]; then
-    FILTERED=$(echo $FILTERED | jq . | grep '\-\(pp\|preprod\)')
-  fi
-  
-  FILTERED=$(printf "%s\n" $FILTERED | sort | grep -v "\[\|\]" | sed "s/\"//g" | sed "s/,//g")
-  NUM_NODES=$(printf "%s\n" $FILTERED | wc -l)
-  
-  if [[ $NUM_NODES -eq 0 ]]; then
-    echo "no instances found for instance name '$ID'"
-    exit 1
-  fi
-
-  if [[ $NUM_NODES -eq 1 ]] || [[ $USE_FIRST_INSTANCE -eq 1 ]]; then
-    TARGET_IP=$(printf "%s\n" $FILTERED | head -n1 | sed 's/__/  /g' | awk '{print $3}')
-  else
-    NODE_NAMES=$(echo $FILTERED |sed 's/ /\^/g' | sed 's/__/    /g')
-    echo "*) all of the following (csshx/i2cssh)"
-    
-    ORIGINAL_IFS=$IFS
-    IFS="^"
-    select name in $NODE_NAMES; do : ; break; done
-
-    ALL_IPS=$(printf "%s\n" $FILTERED | sed 's/__/  /g' | awk '{print $3}' | xargs)
-    IFS=" " read -r -a ALL_IPS <<< "${ALL_IPS}"
-    IFS=$ORIGINAL_IFS
-
-    if [[ $REPLY == '*' ]]; then
-      TARGET_IPS=$(printf "%s\n" $FILTERED | sed 's/__/  /g' | awk '{print $3}' | xargs)
-    elif [[ $REPLY == *','* ]]; then
-      ORIGINAL_IFS=$IFS; IFS="," read -r -a SELECTED_NODES <<< "${REPLY}" ; IFS=$ORIGINAL_IFS
-      for SELECTED_NODE_IDX in ${SELECTED_NODES[@]}; do
-        if [[ ${SELECTED_NODE_IDX} =~ \d*-\d* ]]; then
-          LOWER_LIMIT=$(awk -F '-' '{print $1}' <<< ${SELECTED_NODE_IDX})
-          UPPER_LIMIT=$(awk -F '-' '{print $2}' <<< ${SELECTED_NODE_IDX})
-          for _SELECTED_NODE_IDX in $(seq ${LOWER_LIMIT} ${UPPER_LIMIT}); do
-            TARGET_IPS="${TARGET_IPS} ${ALL_IPS[_SELECTED_NODE_IDX-1]}"
-          done
-        else
-          TARGET_IPS="${TARGET_IPS} ${ALL_IPS[SELECTED_NODE_IDX-1]}"
-        fi
-      done
-    elif [[ $REPLY =~ \d*-\d* ]]; then
-      LOWER_LIMIT=$(awk -F '-' '{print $1}' <<< ${REPLY})
-      UPPER_LIMIT=$(awk -F '-' '{print $2}' <<< ${REPLY})
-      for SELECTED_NODE_IDX in $(seq ${LOWER_LIMIT} ${UPPER_LIMIT}); do
-        TARGET_IPS="${TARGET_IPS} ${ALL_IPS[SELECTED_NODE_IDX-1]}"
-      done
-    else
-      NODE_INDEX=$REPLY
-      TARGET_IP=$(printf "%s\n" $FILTERED | sed -n "${NODE_INDEX}p" | sed 's/__/  /g' | awk '{print $3}')
-    fi
-  fi
+	nodes=$(query_aws_by_name $identifier)
 fi
 
-if [[ "$TARGET_IPS" != "" ]]; then
-  if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
-    i2cssh --login root $TARGET_IPS
-    echo "hint: press Cmd+Shift+I to send your keyboard input to all the instances"
-  else
-    csshx --login root $TARGET_IPS
-  fi
-elif [[ "$TARGET_IP" != "" ]]; then
-  if [[ $USE_DOCKER -eq 1 ]]; then
-    if [[ $USE_VENV -eq 1 ]]; then
-      ssh -o StrictHostKeyChecking=no -l root $TARGET_IP -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
-    else
-      ssh -o StrictHostKeyChecking=no -l root $TARGET_IP -t "hostname; $DOCKER_COMMAND; /bin/bash -l"
-    fi
-  else
-    if [[ $USE_VENV -eq 1 ]]; then
-      ssh -o StrictHostKeyChecking=no -l root $TARGET_IP -t '[[ `which docker` == "" ]] && SERVICE_NAME=`ps aux | grep -v grep | grep gunicorn | grep "opt/prezi" | head -n1 | sed "s~.*/opt/prezi/\(.*\)/\(current\|versions\).*~\1~g"` && cd /opt/prezi/$SERVICE_NAME/current && bash --init-file <(echo "source bin/activate") || echo "cannot activate venv outside of docker" && bash -l'
-    else
-      ssh -o StrictHostKeyChecking=no -l root $TARGET_IP
-    fi
-  fi
-else
-  echo "spoon went tits up"
-  exit 1
+[[ "${verbose}" = 1 ]] && echo "spoon nodes returned from aws: ${nodes}"
+
+if [[ $only_preprod = 1 ]]; then
+	nodes=$(echo ${nodes} | jq 'map(select(.service | test("preprod|-pp")))')
+elif [[ $only_prod = 1 ]]; then
+	nodes=$(echo ${nodes} | jq 'map(select(.service | test("preprod|-pp") | not))')
 fi
+
+if [ "${verbose}" = 1 -a $only_prod = 1 ]; then
+	echo "spoon nodes after filtering for prod/preprod: ${nodes}"
+fi
+
+if [[ $use_first = 1 ]]; then
+	nodes=$(echo "${nodes}" | jq '[.[0]]')
+fi
+
+spoon_ssh "${nodes}"
