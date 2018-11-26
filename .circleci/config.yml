@@ -6,8 +6,8 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Lint with shellcheck
-        command: shellcheck spoon
+          name: Lint with shellcheck
+          command: shellcheck spoon
       - run:
-        name: Run bats test suite
-        command: bats test/*.bats
+          name: Run bats test suite
+          command: bats test/*.bats
