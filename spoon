@@ -7,9 +7,9 @@ print_help() {
 has_short_flag() {
 	flag="$1"
 	shift
-	args="$@"
+	args="$*"
 	for arg in $args; do
-		if [ "${arg:0:1}" = - ] && [ "${arg:1:1}" != - ] && [[ "$arg" =~ "$flag" ]]; then
+		if [ "${arg:0:1}" = - ] && [ "${arg:1:1}" != - ] && [[ "$arg" =~ $flag ]]; then
 			return 0
 		fi
 	done
@@ -19,9 +19,9 @@ has_short_flag() {
 has_long_flag() {
 	flag="$1"
 	shift
-	args="$@"
+	args="$*"
 	for arg in $args; do
-		if [ "${arg:0:2}" = -- ] && [[ "$arg" == --"$flag" ]]; then
+		if [ "${arg:0:2}" = -- ] && [[ "$arg" == "--$flag" ]]; then
 			return 0
 		fi
 	done
@@ -33,6 +33,8 @@ has_long_flag() {
 ################################################
 
 query_aws() {
+	# the backticks are part of the JMESPath expression and should be passed literally, not interpolated - disable relevant shellcheck rule
+	# shellcheck disable=SC2016
 	aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}"
 }
 
@@ -71,9 +73,13 @@ ssh_single() {
 ssh_multiple() {
 	[[ "${dry_run}" = 1 ]] && exit 0
 	if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+		# I actually need the word splitting here, hence the lack of quotes
+		# shellcheck disable=SC2086
 	    i2cssh --login root $1
 	    echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
 	else
+		# I actually need the word splitting here, hence the lack of quotes
+		# shellcheck disable=SC2086
 	    csshx --login root $1
 	fi
 }
@@ -116,20 +122,20 @@ if [[ "${verbose}" = 1 ]]; then
 fi
 
 if [[ $use_instance_id = 1 ]]; then
-	nodes=$(query_aws_by_id $identifier)
+	nodes=$(query_aws_by_id "$identifier")
 else
-	nodes=$(query_aws_by_name $identifier)
+	nodes=$(query_aws_by_name "$identifier")
 fi
 
 [[ "${verbose}" = 1 ]] && echo "spoon nodes returned from aws: ${nodes}"
 
 if [[ $only_preprod = 1 ]]; then
-	nodes=$(echo ${nodes} | jq 'map(select(.service | test("preprod|-pp")))')
+	nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp")))')
 elif [[ $only_prod = 1 ]]; then
-	nodes=$(echo ${nodes} | jq 'map(select(.service | test("preprod|-pp") | not))')
+	nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp") | not))')
 fi
 
-if [ "${verbose}" = 1 -a $only_prod = 1 ]; then
+if [ "${verbose}" = 1 ] && [ $only_prod = 1 ]; then
 	echo "spoon nodes after filtering for prod/preprod: ${nodes}"
 fi
 
