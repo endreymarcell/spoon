@@ -2,14 +2,9 @@ version: 2
 jobs:
   build:
     docker:
-      - image: bats/bats:latest
+      - image: endreymarca/bats-ext
     steps:
       - checkout
-      - run:
-          name: Install bats-mock
-          command: |
-            git clone --depth 1 https://github.com/grayhemp/bats-mock.git /tmp/bats-mock
-            /tmp/bats-mock/build install
       - run:
           name: Run bats test suite
           command: bats test/*.bats
