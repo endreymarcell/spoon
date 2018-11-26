@@ -6,5 +6,10 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install bats-mock
+          command: |
+            git clone --depth 1 https://github.com/grayhemp/bats-mock.git /tmp/bats-mock
+            /tmp/bats-mock/build install
+      - run:
           name: Run bats test suite
           command: bats test/*.bats
