@@ -1,6 +1,8 @@
 # spoon
 
 Easily SSH into EC2 nodes.  
+[![CircleCI](https://circleci.com/gh/endreymarcell/spoon.svg?style=svg)](https://circleci.com/gh/endreymarcell/spoon)
+[![Shellcheck](https://img.shields.io/badge/code%20style-shellcheck-lightgrey.svg)](https://github.com/koalaman/shellcheck)
 
 ## Installation
 
