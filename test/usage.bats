@@ -20,8 +20,3 @@ load "/usr/local/lib/bats-mock.bash"
 	[ $status -eq 1 ]
 	[ "$output" = "identifier must not be empty" ]
 }
-
-@test "If called with an identifier, spoon should query aws." {
-	run $spoon foo
-	[ $(mock_get_call_num $mock_aws_path) -eq 1 ]
-}
