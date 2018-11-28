@@ -28,6 +28,17 @@ has_long_flag() {
 	return 1
 }
 
+check_args() {
+	if [[ "${arg_prod}" = 1 ]] && [[ "${arg_prod}" = 1 ]]; then
+		echo "Invalid arguments: -P/--prod and -p/--preprod are mutually exclusive."
+		exit 1
+	fi
+	if [[ "${arg_first}" = 1 ]] && [[ "${arg_all}" = 1 ]]; then
+		echo "Invalid arguments: -1/--first and -a/--all are mutually exclusive."
+		exit 1
+	fi
+}
+
 ################################################
 ################################################
 ################################################
@@ -129,6 +140,8 @@ if has_short_flag 1 "$@" || has_long_flag first "$@"; then arg_first=1; else arg
 if has_short_flag a "$@" || has_long_flag all "$@"; then arg_all=1; else arg_all=0; fi
 if has_short_flag v "$@" || has_long_flag verbose "$@"; then arg_verbose=1; else arg_verbose=0; fi
 if has_short_flag n "$@" || has_long_flag dry-run "$@"; then arg_dry_run=1; else arg_dry_run=0; fi
+
+check_args
 
 if [[ "${arg_verbose}" = 1 ]]; then
 	echo "[spoon] identifier=${identifier}"
