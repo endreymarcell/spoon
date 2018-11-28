@@ -82,8 +82,8 @@ ssh_single() {
 }
 
 ssh_multiple() {
-	check_cssh_availability
 	[[ "${arg_dry_run}" = 1 ]] && exit 0
+	check_cssh_availability
 	if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
 		# I actually need the word splitting here, hence the lack of quotes
 		# shellcheck disable=SC2086
