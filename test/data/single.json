@@ -1,0 +1,8 @@
+[
+    {
+        "id": "i-abcd1234",
+        "ip": "1.1.1.1",
+        "service": "fooservice",
+        "state": "running"
+    }
+]

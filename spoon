@@ -133,7 +133,7 @@ if [[ "$?" -ne 0 ]]; then
 	exit 1
 fi
 
-[[ "${verbose}" = 1 ]] && echo "[spoon] nodes returned from aws: ${nodes}"
+[[ "${verbose}" = 1 ]] && echo -e "[spoon] nodes returned from aws:\\n${nodes}"
 
 node_count=$(echo "${nodes}" | jq '. | length')
 if [[ "${node_count}" -eq 0 ]]; then
