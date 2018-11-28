@@ -23,11 +23,14 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 	n_lines="${#lines[@]}"
 	last_line_index="$((n_lines - 1))"
 	[ "${lines[$last_line_index]}" = "spoon encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests." ]
-	[ $status -eq 1 ]
+	assert_failure
 }
 
 @test "If no instances are returned from aws, spoon should report this." {
-	skip
+	mock_set_output $mock_aws_path '[]'
+	run $spoon foo
+	assert_failure
+	assert_output "spoon: zero instances found for identifier 'foo'."
 }
 
 @test "If one instance is returned, spoon should attempt to ssh to it." {

@@ -56,11 +56,7 @@ query_aws_by_id() {
 
 spoon_ssh() {
 	nodes="$1"
-	node_count=$(echo "${nodes}" | jq '. | length')
-	if [[ "${node_count}" -eq 0 ]]; then
-		echo No node found for this identifier.
-		exit 1
-	elif [[ "${node_count}" -gt 1 ]]; then
+	if [[ "${node_count}" -gt 1 ]]; then
 		ips=$(echo "${nodes}" | jq '.[].ip' | tr -d '"' | xargs)
 		ssh_multiple "${ips}"
 	else
@@ -138,6 +134,12 @@ if [[ "$?" -ne 0 ]]; then
 fi
 
 [[ "${verbose}" = 1 ]] && echo "spoon nodes returned from aws: ${nodes}"
+
+node_count=$(echo "${nodes}" | jq '. | length')
+if [[ "${node_count}" -eq 0 ]]; then
+	echo "spoon: zero instances found for identifier '${identifier}'."
+	exit 1
+fi
 
 if [[ $only_preprod = 1 ]]; then
 	nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp")))')
