@@ -1,0 +1,14 @@
+[
+    {
+        "id": "i-abcd1234",
+        "ip": "1.1.1.1",
+        "service": "fooservice-prod",
+        "state": "running"
+    },
+    {
+        "id": "i-abcd2345",
+        "ip": "2.2.2.2",
+        "service": "fooservice-preprod",
+        "state": "running"
+    }
+]

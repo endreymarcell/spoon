@@ -29,7 +29,7 @@ has_long_flag() {
 }
 
 check_args() {
-	if [[ "${arg_prod}" = 1 ]] && [[ "${arg_prod}" = 1 ]]; then
+	if [[ "${arg_prod}" = 1 ]] && [[ "${arg_preprod}" = 1 ]]; then
 		echo "Invalid arguments: -P/--prod and -p/--preprod are mutually exclusive."
 		exit 1
 	fi
@@ -67,17 +67,22 @@ query_aws_by_id() {
 
 spoon_ssh() {
 	nodes="$1"
+	node_count=$(echo "${nodes}" | jq '. | length')
+	[[ "${arg_verbose}" = 1 ]] && echo "[spoon] number of instances: ${node_count}"
 	if [[ "${node_count}" -gt 1 ]]; then
 		ips=$(echo "${nodes}" | jq '.[].ip' | tr -d '"' | xargs)
+		[[ "${arg_verbose}" = 1 ]] && echo "[spoon] IP addresses: ${ips}"
 		ssh_multiple "${ips}"
 	else
 		ip=$(echo "${nodes}" | jq '.[0].ip' | tr -d '"')
+		[[ "${arg_verbose}" = 1 ]] && echo "[spoon] IP address: ${ip}"
 		ssh_single -o StrictHostKeyChecking=no -l root  "${ip}"
 	fi
 }
 
 ssh_single() {
 	[[ "${arg_dry_run}" = 1 ]] && exit 0
+	[[ "${arg_verbose}" = 1 ]] && echo "[spoon] calling ssh"
 	ssh "${@}"
 }
 
@@ -85,11 +90,13 @@ ssh_multiple() {
 	[[ "${arg_dry_run}" = 1 ]] && exit 0
 	check_cssh_availability
 	if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+		[[ "${arg_verbose}" = 1 ]] && echo "[spoon] calling i2cssh"
 		# I actually need the word splitting here, hence the lack of quotes
 		# shellcheck disable=SC2086
 	    i2cssh --login root $1
 	    echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
 	else
+		[[ "${arg_verbose}" = 1 ]] && echo "[spoon] calling csshx"
 		# I actually need the word splitting here, hence the lack of quotes
 		# shellcheck disable=SC2086
 	    csshx --login root $1
@@ -97,6 +104,7 @@ ssh_multiple() {
 }
 
 check_cssh_availability() {
+	[[ "${arg_verbose}" = 1 ]] && echo "[spoon] TERM_PROGRAM is ${TERM_PROGRAM}"
 	if [[ "${TERM_PROGRAM}" == iTerm.app ]]; then
 		if ! command -v i2cssh >/dev/null; then
 			echo Please install i2cssh to SSH to multiple instances.
@@ -172,16 +180,25 @@ fi
 
 if [[ $arg_preprod = 1 ]]; then
 	nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp")))')
+	[[ "${arg_verbose}" = 1 ]] && echo "[spoon] nodes after filtering for preprod: ${nodes}"
+	node_count=$(echo "${nodes}" | jq '. | length')
+	if [[ "${node_count}" -eq 0 ]]; then
+		echo "No instances found for identifier '${identifier}' after filtering for preprod."
+		exit 1
+	fi
 elif [[ $arg_prod = 1 ]]; then
 	nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp") | not))')
-fi
-
-if [ "${arg_verbose}" = 1 ] && [ $arg_prod = 1 ]; then
-	echo "[spoon] nodes after filtering for prod/preprod: ${nodes}"
+	[[ "${arg_verbose}" = 1 ]] && echo "[spoon] nodes after filtering for prod: ${nodes}"
+	node_count=$(echo "${nodes}" | jq '. | length')
+	if [[ "${node_count}" -eq 0 ]]; then
+		echo "No instances found for identifier '${identifier}' after filtering for prod."
+		exit 1
+	fi
 fi
 
 if [[ $arg_first = 1 ]]; then
 	nodes=$(echo "${nodes}" | jq '[.[0]]')
+	[[ "${arg_verbose}" = 1 ]] && echo -e "[spoon] first instance:\\n${nodes}"
 fi
 
 spoon_ssh "${nodes}"
