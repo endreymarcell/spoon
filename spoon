@@ -71,6 +71,7 @@ ssh_single() {
 }
 
 ssh_multiple() {
+	check_cssh_availability
 	[[ "${dry_run}" = 1 ]] && exit 0
 	if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
 		# I actually need the word splitting here, hence the lack of quotes
@@ -83,6 +84,22 @@ ssh_multiple() {
 	    csshx --login root $1
 	fi
 }
+
+check_cssh_availability() {
+	if [[ "${TERM_PROGRAM}" == iTerm.app ]]; then
+		if ! command -v i2cssh >/dev/null; then
+			echo Please install i2cssh to SSH to multiple instances.
+			exit 1
+		fi
+	else
+		if ! command -v csshx >/dev/null; then
+			echo Please install csshX to SSH to multiple instances.
+			exit 1
+		fi
+	fi
+}
+
+check_cssh_availability
 
 ################################################
 ################################################
