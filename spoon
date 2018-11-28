@@ -126,6 +126,7 @@ if has_short_flag i "$@" || has_long_flag instance-id "$@"; then use_instance_id
 if has_short_flag p "$@" || has_long_flag preprod "$@"; then only_preprod=1; else only_preprod=0; fi
 if has_short_flag P "$@" || has_long_flag prod "$@"; then only_prod=1; else only_prod=0; fi
 if has_short_flag 1 "$@" || has_long_flag first "$@"; then use_first=1; else use_first=0; fi
+if has_short_flag a "$@" || has_long_flag all "$@"; then all_instances=1; else all_instances=0; fi
 if has_short_flag v "$@" || has_long_flag verbose "$@"; then verbose=1; else verbose=0; fi
 if has_short_flag n "$@" || has_long_flag dry-run "$@"; then dry_run=1; else dry_run=0; fi
 
