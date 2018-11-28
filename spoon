@@ -113,12 +113,12 @@ if has_short_flag v "$@" || has_long_flag verbose "$@"; then verbose=1; else ver
 if has_short_flag n "$@" || has_long_flag dry-run "$@"; then dry_run=1; else dry_run=0; fi
 
 if [[ "${verbose}" = 1 ]]; then
-	echo "spoon identifier=${identifier}"
-	echo "spoon use_instance_id=${use_instance_id}"
-	echo "spoon only_preprod=${only_preprod}"
-	echo "spoon only_prod=${only_prod}"
-	echo "spoon use_first=${use_first}"
-	echo "spoon dry_run=${dry_run}"
+	echo "[spoon] identifier=${identifier}"
+	echo "[spoon] use_instance_id=${use_instance_id}"
+	echo "[spoon] only_preprod=${only_preprod}"
+	echo "[spoon] only_prod=${only_prod}"
+	echo "[spoon] use_first=${use_first}"
+	echo "[spoon] dry_run=${dry_run}"
 fi
 
 if [[ $use_instance_id = 1 ]]; then
@@ -129,15 +129,15 @@ fi
 # I don't want to cram the entire if statement into the condition of another one
 # shellcheck disable=SC2181
 if [[ "$?" -ne 0 ]]; then
-	echo "spoon encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests."
+	echo "Encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests."
 	exit 1
 fi
 
-[[ "${verbose}" = 1 ]] && echo "spoon nodes returned from aws: ${nodes}"
+[[ "${verbose}" = 1 ]] && echo "[spoon] nodes returned from aws: ${nodes}"
 
 node_count=$(echo "${nodes}" | jq '. | length')
 if [[ "${node_count}" -eq 0 ]]; then
-	echo "spoon: zero instances found for identifier '${identifier}'."
+	echo "No instances found for identifier '${identifier}'."
 	exit 1
 fi
 
@@ -148,7 +148,7 @@ elif [[ $only_prod = 1 ]]; then
 fi
 
 if [ "${verbose}" = 1 ] && [ $only_prod = 1 ]; then
-	echo "spoon nodes after filtering for prod/preprod: ${nodes}"
+	echo "[spoon] nodes after filtering for prod/preprod: ${nodes}"
 fi
 
 if [[ $use_first = 1 ]]; then

@@ -4,7 +4,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 
 @test "If called with an identifier, spoon should query aws." {
 	run $spoon foo
-	[ $(mock_get_call_num $mock_aws_path) -eq 1 ]
+	assert_equal $(mock_get_call_num $mock_aws_path) 1
 }
 
 @test "If called without the instance-id flag, spoon should query aws filtering for the service_name tag." {
@@ -20,9 +20,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 @test "If the aws query errors out, spoon should print an error message and exit with 1." {
 	mock_set_side_effect $mock_aws_path "exit 1"
 	run $spoon foo
-	n_lines="${#lines[@]}"
-	last_line_index="$((n_lines - 1))"
-	[ "${lines[$last_line_index]}" = "spoon encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests." ]
+	assert_line "Encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests."
 	assert_failure
 }
 
@@ -30,7 +28,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 	mock_set_output $mock_aws_path '[]'
 	run $spoon foo
 	assert_failure
-	assert_output "spoon: zero instances found for identifier 'foo'."
+	assert_output "No instances found for identifier 'foo'."
 }
 
 @test "If one instance is returned, spoon should attempt to ssh to it." {
