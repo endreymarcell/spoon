@@ -18,8 +18,13 @@ load "/usr/local/lib/bats-mock.bash"
 	[[ $(mock_get_call_args $mock_aws_path) =~ '--instance-ids foo' ]]
 }
 
-@test "If the aws query errors out, spoon should print an error message." {
-	skip
+@test "If the aws query errors out, spoon should print an error message and exit with 1." {
+	mock_set_side_effect $mock_aws_path "exit 1"
+	run $spoon foo
+	n_lines="${#lines[@]}"
+	last_line_index="$((n_lines - 1))"
+	[ "${lines[$last_line_index]}" = "spoon encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests." ]
+	[ $status -eq 1 ]
 }
 
 @test "If no instances are returned from aws, spoon should report this." {

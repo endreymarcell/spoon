@@ -35,7 +35,11 @@ has_long_flag() {
 query_aws() {
 	# the backticks are part of the JMESPath expression and should be passed literally, not interpolated - disable relevant shellcheck rule
 	# shellcheck disable=SC2016
-	aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}"
+	if nodes="$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}")"; then
+		echo "${nodes}"
+	else
+		return 1
+	fi
 }
 
 query_aws_by_name() {
@@ -125,6 +129,12 @@ if [[ $use_instance_id = 1 ]]; then
 	nodes=$(query_aws_by_id "$identifier")
 else
 	nodes=$(query_aws_by_name "$identifier")
+fi
+# I don't want to cram the entire if statement into the condition of another one
+# shellcheck disable=SC2181
+if [[ "$?" -ne 0 ]]; then
+	echo "spoon encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests."
+	exit 1
 fi
 
 [[ "${verbose}" = 1 ]] && echo "spoon nodes returned from aws: ${nodes}"
