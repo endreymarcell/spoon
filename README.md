@@ -22,10 +22,10 @@ brew install spoon
 `spoon [options] identifier`
 
 Options:
-`-h` or `--help`
-`-v` or `--verbose`
-`-n` or `--dry-run`
-`-p` or `--preprod`
-`-P` or `--prod`
-`-1` or `--first`
-`-a` or `--all`
+`-h` or `--help`  
+`-v` or `--verbose`  
+`-n` or `--dry-run`  
+`-p` or `--preprod`  
+`-P` or `--prod`  
+`-1` or `--first`  
+`-a` or `--all`  
