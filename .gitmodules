@@ -1,0 +1,3 @@
+[submodule "test/lib/bats-mock"]
+	path = test/lib/bats-mock
+	url = https://github.com/grayhemp/bats-mock.git
