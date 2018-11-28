@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# source bats helpers
+source "$BATS_TEST_DIRNAME/lib/bats-support/load.bash"
+source "$BATS_TEST_DIRNAME/lib/bats-assert/load.bash"
+source "$BATS_TEST_DIRNAME/lib/bats-mock/src/bats-mock.bash"
+
 # create mocks and export mock utility functions
 setup() {
 	export mock_aws_path="$(mock_create)"

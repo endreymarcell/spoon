@@ -1,7 +1,6 @@
 #!/usr/bin/env bats
 
-source "$BATS_TEST_DIRNAME/environment.sh"
-source "$BATS_TEST_DIRNAME/lib/bats-mock/src/bats-mock.bash"
+source "$BATS_TEST_DIRNAME/bats-setup.sh"
 
 @test "If called with an identifier, spoon should query aws." {
 	run $spoon foo

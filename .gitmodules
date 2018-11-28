@@ -1,3 +1,9 @@
 [submodule "test/lib/bats-mock"]
 	path = test/lib/bats-mock
 	url = https://github.com/grayhemp/bats-mock.git
+[submodule "test/lib/bats-assert"]
+	path = test/lib/bats-assert
+	url = https://github.com/jasonkarns/bats-assert-1
+[submodule "test/lib/bats-support"]
+	path = test/lib/bats-support
+	url = https://github.com/ztombol/bats-support.git
