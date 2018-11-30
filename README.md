@@ -9,23 +9,34 @@ Easily SSH into EC2 nodes.
 
 ## Installation
 
-Requirements: awscli, jq
-Optional: csshx or i2cssh
-
 ```
 brew tap endreymarcell/homebrew-marca
 brew install spoon
 ```
+Requirements: [awscli](https://aws.amazon.com/cli/), [jq](https://stedolan.github.io/jq/) (spoon installs these automatically if they're missing)  
+Optional: [csshx](https://github.com/brockgr/csshx) or [i2cssh](https://github.com/wouterdebie/i2cssh)  
 
 ## Usage
 
 `spoon [options] identifier`
 
-Options:
+__Options:__  
 `-h` or `--help`  
+&nbsp;&nbsp;&nbsp;&nbsp;print usage information and exit  
 `-v` or `--verbose`  
+&nbsp;&nbsp;&nbsp;&nbsp;enable verbose logging  
 `-n` or `--dry-run`  
+&nbsp;&nbsp;&nbsp;&nbsp;print selected IPs but don't initiate SSH connection  
+`-i` or `--instance-id`  
+&nbsp;&nbsp;&nbsp;&nbsp;find instance by id rather than service name  
 `-p` or `--preprod`  
+&nbsp;&nbsp;&nbsp;&nbsp;filter for preprod instances  
 `-P` or `--prod`  
+&nbsp;&nbsp;&nbsp;&nbsp;filter for production instances  
 `-1` or `--first`  
+&nbsp;&nbsp;&nbsp;&nbsp;if there are multiple instances, select the first one without a prompt  
 `-a` or `--all`  
+&nbsp;&nbsp;&nbsp;&nbsp;if there are multiple instances, select all of them without a prompt  
+
+__Identifier:__  
+Either (the part of) a service name, or the instance ID (if the `-i` flag is provided).  
