@@ -3,6 +3,8 @@
 source "$BATS_TEST_DIRNAME/bats-setup.sh"
 
 @test "If multiple instances are returned, spoon should check the availability of a cssh utility (csshx on Terminal)." {
+	skip "have to figure out how to pass input to spoon from bats"
+
 	# setup
 	export mock_command_path="$(mock_create)"
 	function command() {
@@ -27,6 +29,8 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 }
 
 @test "If multiple instances are returned, spoon should check the availability of a cssh utility (i2cssh on iTerm2)." {
+	skip "have to figure out how to pass input to spoon from bats"
+
 	# setup
 	export mock_command_path="$(mock_create)"
 	function command() {
@@ -51,6 +55,8 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 }
 
 @test "If multiple instances are returned, and a cssh utility is available (csshx on Terminal), spoon should pass all the IPs to it." {
+	skip "have to figure out how to pass input to spoon from bats"
+
 	# setup
 	export mock_command_path="$(mock_create)"
 	function command() {
@@ -75,6 +81,8 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 }
 
 @test "If multiple instances are returned, and a cssh utility is available (i2cssh on iTerm2), spoon should pass all the IPs to it." {
+	skip "have to figure out how to pass input to spoon from bats"
+
 	# setup
 	export mock_command_path="$(mock_create)"
 	function command() {
