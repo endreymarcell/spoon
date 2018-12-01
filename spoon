@@ -123,6 +123,21 @@ check_cssh_availability() {
 ################################################
 ################################################
 
+jqrangify() {
+	expr=""
+	for item in $(echo "${*}" | tr , ' '); do
+		lower="${item//-*/}"
+		upper="${item//*-/}"
+		jqrangified_item="$((lower - 1)):${upper}"
+		expr="${expr} .[${jqrangified_item}] +"
+	done
+	echo "${expr} []"
+}
+
+################################################
+################################################
+################################################
+
 if [[ $# -lt 1 ]]; then
 	print_help
 	exit 1
@@ -146,6 +161,7 @@ if has_short_flag P "$@" || has_long_flag prod "$@"; then arg_prod=1; else arg_p
 if has_short_flag 1 "$@" || has_long_flag first "$@"; then arg_first=1; else arg_first=0; fi
 if has_short_flag a "$@" || has_long_flag all "$@"; then arg_all=1; else arg_all=0; fi
 if has_short_flag v "$@" || has_long_flag verbose "$@"; then arg_verbose=1; else arg_verbose=0; fi
+if has_short_flag V "$@"; then arg_verbose=1 && arg_verybose=1; else arg_verybose=0; fi
 if has_short_flag n "$@" || has_long_flag dry-run "$@"; then arg_dry_run=1; else arg_dry_run=0; fi
 
 check_args
@@ -172,7 +188,7 @@ if [[ "$?" -ne 0 ]]; then
 fi
 
 nodes="$(echo "${nodes}" | jq 'sort_by(.service)')"
-[[ "${arg_verbose}" = 1 ]] && echo -e "[spoon] nodes returned from aws:\\n${nodes}"
+[[ "${arg_verybose}" = 1 ]] && echo -e "[spoon] instances returned from aws:\\n${nodes}"
 
 node_count=$(echo "${nodes}" | jq '. | length')
 if [[ "${node_count}" -eq 0 ]]; then
@@ -212,14 +228,10 @@ if [[ $arg_all = 0 ]] && [[ $node_count -gt 1 ]]; then
 	if [[ "${reply}" = '*' ]]; then
 		[[ "${arg_verbose}" = 1 ]] && echo all instances selected
 	else
-		if [[ "${reply}" -eq "${reply}" ]] && [[ "${reply}" -gt 0 ]] && [[ "${reply}" -le "${node_count}" ]]; then
-			[[ "${arg_verbose}" = 1 ]] && echo -e "[spoon] instance number ${reply} selected:"
-			nodes="$(echo "${nodes}" | jq "[.[$((reply - 1))]]")"
-			[[ "${arg_verbose}" = 1 ]] && echo "${nodes}"
-		else
-			echo invalid selector
-			exit 1
-		fi
+		jq_range_expression="$(jqrangify "${reply}")"
+		[[ "${arg_verybose}" = 1 ]] && echo "[spoon] jq range expression: ${jq_range_expression}"
+		nodes="$(echo "${nodes}" | jq "${jq_range_expression}")"
+		[[ "${arg_verybose}" = 1 ]] && echo -e "[spoon] selected instances:\\n${nodes}"
 	fi
 fi
 
