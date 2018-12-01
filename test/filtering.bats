@@ -18,8 +18,6 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 }
 
 @test "Filtering for prod: multiple instances returned." {
-	skip "have to figure out how to pass input to spoon from bats"
-
 	# setup
 	export mock_command_path="$(mock_create)"
 	function command() {
@@ -32,13 +30,12 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple-prod-only.json)"
 
 	# WHEN
-	TERM_PROGRAM=Apple_Terminal run $spoon -P foo
+	TERM_PROGRAM=Apple_Terminal run $spoon -P foo <<< ''
 
 	#THEN
 	assert_success
-	assert_equal $(mock_get_call_num $mock_csshx_path) 1
-	assert_equal_regex "$(mock_get_call_args $mock_csshx_path)" '1.1.1.1 2.2.2.2 3.3.3.3'
-
+	assert_output "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-prod-only)"
+	
 	# teardown
 	unset mock_command_path command
 }
@@ -59,8 +56,6 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 }
 
 @test "Filtering for preprod: multiple instances returned." {
-	skip "have to figure out how to pass input to spoon from bats"
-
 	# setup
 	export mock_command_path="$(mock_create)"
 	function command() {
@@ -73,12 +68,11 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple-preprod-only.json)"
 
 	# WHEN
-	TERM_PROGRAM=Apple_Terminal run $spoon -p foo
+	TERM_PROGRAM=Apple_Terminal run $spoon -p foo <<< ''
 
 	#THEN
 	assert_success
-	assert_equal $(mock_get_call_num $mock_csshx_path) 1
-	assert_equal_regex "$(mock_get_call_args $mock_csshx_path)" '1.1.1.1 2.2.2.2 3.3.3.3'
+	assert_output "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-preprod-only)"
 
 	# teardown
 	unset mock_command_path command
