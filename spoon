@@ -225,12 +225,19 @@ if [[ $arg_all = 0 ]] && [[ $node_count -gt 1 ]]; then
 	echo "${nodes_data}"| nl '-s) ' | column -t
 	echo "*)  all"
 	read -rp '==> ' reply
+	if [[ "${reply}" = "" ]]; then
+		[[ "${arg_verbose}" = 1 ]] && echo "[spoon] no instances selected; spoon will now exit."
+		exit 0
+	fi
 	if [[ "${reply}" = '*' ]]; then
 		[[ "${arg_verbose}" = 1 ]] && echo all instances selected
 	else
 		jq_range_expression="$(jqrangify "${reply}")"
 		[[ "${arg_verybose}" = 1 ]] && echo "[spoon] jq range expression: ${jq_range_expression}"
-		nodes="$(echo "${nodes}" | jq "${jq_range_expression}")"
+		if ! nodes="$(echo "${nodes}" | jq "${jq_range_expression}" 2>/dev/null)"; then
+			echo "[spoon] jq error: invalid selector"
+			exit 1
+		fi
 		[[ "${arg_verybose}" = 1 ]] && echo -e "[spoon] selected instances:\\n${nodes}"
 	fi
 fi
