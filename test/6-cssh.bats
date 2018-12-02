@@ -6,7 +6,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 	mock_set_status $mock_command_path 1
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
 
-	TERM_PROGRAM=Apple_Terminal run $spoon foo <<< '*'
+	run $spoon foo <<< '*'
 
 	assert_failure
 	assert_line "Please install csshX to SSH to multiple instances."
@@ -27,7 +27,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 @test "If multiple instances are returned, and a cssh utility is available (csshx on Terminal), spoon should pass all the IPs to it." {
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
 
-	TERM_PROGRAM=Apple_Terminal run $spoon foo <<< '*'
+	run $spoon foo <<< '*'
 
 	assert_success
 	assert_equal $(mock_get_call_num $mock_csshx_path) 1
