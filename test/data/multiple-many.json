@@ -52,11 +52,5 @@
         "ip": "9.9.9.9",
         "service": "9-fooservice",
         "state": "running"
-    },
-    {
-        "id": "i-abcd0ABC",
-        "ip": "10.10.10.10",
-        "service": "10-fooservice",
-        "state": "running"
     }
 ]

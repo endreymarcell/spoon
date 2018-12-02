@@ -242,6 +242,11 @@ if [[ $arg_all = 0 ]] && [[ $node_count -gt 1 ]]; then
 			echo "[spoon] jq error: invalid selector"
 			exit 1
 		fi
+		node_count=$(echo "${nodes}" | jq '. | length')
+		if [[ "${node_count}" -eq 0 ]]; then
+			echo "[spoon] no instances selected; spoon will now exit."
+			exit 0
+		fi
 		[[ "${arg_verybose}" = 1 ]] && echo -e "[spoon] selected instances:\\n${nodes}"
 	fi
 fi
