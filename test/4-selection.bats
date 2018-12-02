@@ -3,15 +3,7 @@
 source "$BATS_TEST_DIRNAME/bats-setup.sh"
 
 @test "Selection: no instances selected" {
-	# setup
-	export mock_command_path="$(mock_create)"
-	function command() {
-		bash "${mock_command_path}" "${@}"
-	}
-	export -f command
-
 	# GIVEN
-	mock_set_status $mock_command_path 0
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple-many.json)"
 
 	# WHEN
@@ -20,9 +12,6 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 	#THEN
 	assert_success
 	assert_equal $(mock_get_call_num $mock_ssh_path) 0
-	
-	# teardown
-	unset mock_command_path command
 }
 
 @test "Selection: all instances selected via *" {
@@ -34,15 +23,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 }
 
 @test "Selection: a single instance selected" {
-	# setup
-	export mock_command_path="$(mock_create)"
-	function command() {
-		bash "${mock_command_path}" "${@}"
-	}
-	export -f command
-
 	# GIVEN
-	mock_set_status $mock_command_path 0
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple-many.json)"
 
 	# WHEN
@@ -52,9 +33,6 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 	assert_success
 	assert_equal $(mock_get_call_num $mock_ssh_path) 1
 	assert_equal_regex "$(mock_get_call_args $mock_ssh_path)" '1.1.1.1'
-	
-	# teardown
-	unset mock_command_path command
 }
 
 @test "Selection: multiple single instances selected" {

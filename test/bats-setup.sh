@@ -12,8 +12,11 @@ setup() {
 	export mock_ssh_path="$(mock_create)"
 	export mock_csshx_path="$(mock_create)"
 	export mock_i2cssh_path="$(mock_create)"
+	export mock_command_path="$(mock_create)"
+
 	spoon="$BATS_TEST_DIRNAME/../spoon"
-	export -f aws ssh csshx i2cssh
+
+	export -f aws ssh csshx i2cssh command
 }
 
 
@@ -38,4 +41,8 @@ csshx() {
 
 i2cssh() {
 	bash "${mock_i2cssh_path}" "${@}"
+}
+
+command() {
+	bash "${mock_command_path}" "${@}"
 }

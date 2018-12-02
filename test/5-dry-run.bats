@@ -12,13 +12,6 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 @test "Dry run: multiple instances." {
 	skip "have to figure out how to pass input to spoon from bats"
 
-	# setup
-	export mock_command_path="$(mock_create)"
-	function command() {
-		bash "${mock_command_path}" "${@}"
-	}
-	export -f command
-
 	# GIVEN
 	mock_set_status $mock_command_path 1
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
@@ -29,7 +22,4 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 	#THEN
 	assert_success
 	assert_equal $(mock_get_call_num $mock_csshx_path) 0
-
-	# teardown
-	unset mock_command_path command
 }
