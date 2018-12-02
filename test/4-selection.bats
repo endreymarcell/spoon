@@ -2,3 +2,81 @@
 
 source "$BATS_TEST_DIRNAME/bats-setup.sh"
 
+@test "Selection: no instances selected" {
+	# setup
+	export mock_command_path="$(mock_create)"
+	function command() {
+		bash "${mock_command_path}" "${@}"
+	}
+	export -f command
+
+	# GIVEN
+	mock_set_status $mock_command_path 0
+	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple-many.json)"
+
+	# WHEN
+	TERM_PROGRAM=Apple_Terminal run $spoon -P foo <<< ''
+
+	#THEN
+	assert_success
+	assert_equal $(mock_get_call_num $mock_ssh_path) 0
+	
+	# teardown
+	unset mock_command_path command
+}
+
+@test "Selection: all instances selected via *" {
+	skip "TODO"
+}
+
+@test "Selection: invalid selector (letters)" {
+	skip "TODO"
+}
+
+@test "Selection: a single instance selected" {
+	# setup
+	export mock_command_path="$(mock_create)"
+	function command() {
+		bash "${mock_command_path}" "${@}"
+	}
+	export -f command
+
+	# GIVEN
+	mock_set_status $mock_command_path 0
+	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple-many.json)"
+
+	# WHEN
+	TERM_PROGRAM=Apple_Terminal run $spoon -P foo <<< 1
+
+	#THEN
+	assert_success
+	assert_equal $(mock_get_call_num $mock_ssh_path) 1
+	assert_equal_regex "$(mock_get_call_args $mock_ssh_path)" '1.1.1.1'
+	
+	# teardown
+	unset mock_command_path command
+}
+
+@test "Selection: multiple single instances selected" {
+	skip "TODO"
+}
+
+@test "Selection: single instance index out of range" {
+	skip "TODO"
+}
+
+@test "Selection: one range selected" {
+	skip "TODO"
+}
+
+@test "Selection: multiple ranges selected" {
+	skip "TODO"
+}
+
+@test "Selection: range selector out of range" {
+	skip "TODO"
+}
+
+@test "Selection: single and range selectors mixed" {
+	skip "TODO"
+}

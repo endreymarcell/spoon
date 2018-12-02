@@ -1,0 +1,62 @@
+[
+    {
+        "id": "i-abcd1234",
+        "ip": "1.1.1.1",
+        "service": "1-fooservice",
+        "state": "running"
+    },
+    {
+        "id": "i-abcd2345",
+        "ip": "2.2.2.2",
+        "service": "2-fooservice",
+        "state": "running"
+    },
+    {
+        "id": "i-abcd3456",
+        "ip": "3.3.3.3",
+        "service": "3-fooservice",
+        "state": "running"
+    },
+    {
+        "id": "i-abcd4567",
+        "ip": "4.4.4.4",
+        "service": "4-fooservice",
+        "state": "running"
+    },
+    {
+        "id": "i-abcd5678",
+        "ip": "5.5.5.5",
+        "service": "5-fooservice",
+        "state": "running"
+    },
+    {
+        "id": "i-abcd6789",
+        "ip": "6.6.6.6",
+        "service": "6-fooservice",
+        "state": "running"
+    },
+    {
+        "id": "i-abcd7890",
+        "ip": "7.7.7.7",
+        "service": "7-fooservice",
+        "state": "running"
+    },
+    {
+        "id": "i-abcd890A",
+        "ip": "8.8.8.8",
+        "service": "8-fooservice",
+        "state": "running"
+    },
+    {
+        "id": "i-abcd90AB",
+        "ip": "9.9.9.9",
+        "service": "9-fooservice",
+        "state": "running"
+    },
+    {
+        "id": "i-abcd0ABC",
+        "ip": "10.10.10.10",
+        "service": "10-fooservice",
+        "state": "running"
+    }
+]
