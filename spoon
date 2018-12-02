@@ -43,7 +43,9 @@ check_args() {
 ################################################################################################
 
 query_aws() {
-	# the backticks are part of the JMESPath expression and should be passed literally, not interpolated - disable relevant shellcheck rule
+	[[ "${arg_verbose}" = 1 ]] && echo "[spoon] querying aws..."
+	# The backticks are part of the JMESPath expression and should be
+	# passed literally, not interpolated - disable relevant shellcheck rule.
 	# shellcheck disable=SC2016
 	if nodes="$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}")"; then
 		echo "${nodes}"
@@ -122,9 +124,9 @@ check_cssh_availability() {
 
 jqrangify() {
 	# The easiest way I found to select multiple items, including ranges, from the array
-	# is to convert all indices to jq range expressions to extract subarrays
+	# is converting all indices to jq range expressions to extract subarrays
 	# and adding these all together.
-	# e.g '1, 3, 5-10' --> .[0:1] + .[2:3] + .[4:10]
+	# e.g '1, 3, 5-10' --> jq '.[0:1] + .[2:3] + .[4:10]'
 	expr=""
 	for item in $(echo "${*}" | tr , ' '); do
 		# note: for single numbers 'lower' and 'upper' end up being the same
