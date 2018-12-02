@@ -16,6 +16,8 @@ brew install spoon
 Requirements: [awscli](https://aws.amazon.com/cli/), [jq](https://stedolan.github.io/jq/) (spoon installs these automatically if they're missing)  
 Optional: [csshx](https://github.com/brockgr/csshx) or [i2cssh](https://github.com/wouterdebie/i2cssh)  
 
+(Note: spoon is a single executable bash script, so if you can't/don't want to use Homebrew, you can just copy the file and put it on your path.)  
+
 ## Usage
 
 `spoon [options] identifier`
@@ -40,3 +42,8 @@ __Options:__
 
 __Identifier:__  
 Either (the part of) a service name, or the instance ID (if the `-i` flag is provided).  
+
+## Contribution
+Pull requests are welcome.  
+Run tests with `make test` (requires [bats-core](https://github.com/bats-core/bats-core)) and the linter with `make lint` (requires [shellcheck](https://github.com/koalaman/shellcheck)).  
+There's also a [CircleCI job](https://circleci.com/gh/endreymarcell/spoon).
