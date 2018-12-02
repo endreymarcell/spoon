@@ -10,14 +10,11 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 }
 
 @test "Dry run: multiple instances." {
-	# GIVEN
 	mock_set_status $mock_command_path 1
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
 
-	# WHEN
 	TERM_PROGRAM=Apple_Terminal run $spoon -n foo <<< '*'
 
-	#THEN
 	assert_success
 	assert_equal $(mock_get_call_num $mock_csshx_path) 0
 }
