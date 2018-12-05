@@ -204,7 +204,7 @@ jqrangify() {
         expr="${expr} .[${jqrangified_item}] +"
     done
     # append [] at the end to deal with the trailing + sign
-    echo "${expr} []"
+    echo "${expr} []" | xargs
 }
 
 ################################################################################################
@@ -267,15 +267,17 @@ check_cssh_availability() {
 ### execution starts here
 ################################################################################################
 
-spoon_usage_and_help "${@}"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    spoon_usage_and_help "${@}"
 
-spoon_set_args "${@}"
-spoon_check_args
-spoon_verbose_print_args
+    spoon_set_args "${@}"
+    spoon_check_args
+    spoon_verbose_print_args
 
-spoon_get_instances_from_aws
-spoon_filter_for_environment
-spoon_filter_for_first
-spoon_select_from_multiple
+    spoon_get_instances_from_aws
+    spoon_filter_for_environment
+    spoon_filter_for_first
+    spoon_select_from_multiple
 
-spoon_ssh
+    spoon_ssh
+fi
