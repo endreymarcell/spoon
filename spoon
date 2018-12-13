@@ -37,6 +37,7 @@ spoon_set_args() {
     if has_short_flag 1 "$@" || has_long_flag first "$@"; then arg_first=1; else arg_first=0; fi
     if has_short_flag a "$@" || has_long_flag all "$@"; then arg_all=1; else arg_all=0; fi
     if has_short_flag n "$@" || has_long_flag dry-run "$@"; then arg_dry_run=1; else arg_dry_run=0; fi
+    if has_short_flag d "$@" || has_long_flag docker "$@"; then arg_docker=1; else arg_docker=0; fi
     if has_short_flag v "$@" || has_long_flag verbose "$@"; then arg_verbose=1; else arg_verbose=0; fi
     if has_short_flag V "$@"; then arg_verbose=1 && arg_verybose=1; else arg_verybose=0; fi
 }
@@ -231,8 +232,12 @@ spoon_ssh() {
 
 ssh_single() {
     [[ "${arg_dry_run}" = 1 ]] && exit 0
-    [[ "${arg_verbose}" = 1 ]] && echo "[spoon] calling ssh"
-    ssh "${@}"
+    verbose_log "[spoon] calling ssh"
+    if [[ "${arg_docker}" = 1 ]]; then
+        ssh "${@}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
+    else
+        ssh "${@}"
+    fi
 }
 
 ssh_multiple() {
