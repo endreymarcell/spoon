@@ -231,7 +231,7 @@ spoon_ssh() {
 }
 
 ssh_single() {
-    [[ "${arg_dry_run}" = 1 ]] && exit 0
+    [[ "${arg_dry_run}" = 1 ]] && return
     verbose_log "[spoon] calling ssh"
     if [[ "${arg_docker}" = 1 ]]; then
         ssh "${@}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
@@ -241,7 +241,7 @@ ssh_single() {
 }
 
 ssh_multiple() {
-    [[ "${arg_dry_run}" = 1 ]] && exit 0
+    [[ "${arg_dry_run}" = 1 ]] && return
     check_cssh_availability
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
         verbose_log "[spoon] calling i2cssh"
@@ -273,6 +273,19 @@ check_cssh_availability() {
 }
 
 ################################################################################################
+################################################################################################
+
+spoon_build_cache() {
+    verbose_log "[spoon] building cache in the background..."
+    cache_file_path=~/.cache/spoon_aws_cache
+    pull_every_node_from_aws &
+}
+
+pull_every_node_from_aws() {
+    nodes="$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}" > ~/.cache/spoon_aws_cache)"
+}
+
+################################################################################################
 ### execution starts here
 ################################################################################################
 
@@ -289,4 +302,6 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     spoon_select_from_multiple
 
     spoon_ssh
+
+    spoon_build_cache
 fi
