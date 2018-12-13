@@ -17,7 +17,7 @@ print_help() {
 }
 
 verbose_log() {
-    [[ "${arg_verbose}" = 1 ]] && echo "${@}" >&2
+    [[ "${arg_verbose}" = 1 ]] && echo -e "${@}" >&2
 }
 
 ################################################################################################
@@ -160,7 +160,7 @@ spoon_filter_for_environment() {
 spoon_filter_for_first() {
     if [[ $arg_first = 1 ]]; then
         nodes=$(echo "${nodes}" | jq '[.[0]]')
-        verbose_log -e "[spoon] first instance selected:\\n${nodes}"
+        verbose_log "[spoon] first instance selected:\\n${nodes}"
         node_count=1
     fi
 }
