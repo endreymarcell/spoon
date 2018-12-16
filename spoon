@@ -91,7 +91,46 @@ spoon_verbose_print_args() {
 ################################################################################################
 ################################################################################################
 
-spoon_get_instances_from_aws() {
+CACHE_FILE_PATH=~/.cache/spoon_aws_cache.json
+CACHE_EXPIRY_HOURS=24
+
+spoon_get_instances() {
+    verbose_log "[spoon] getting instances"
+    if is_cache_fresh; then
+        verbose_log "[spoon] cache was updated recently, reading instances from ${CACHE_FILE_PATH}"
+        get_instances_from_cache
+    else
+        verbose_log "[spoon] cache file does not exist at ${CACHE_FILE_PATH} or wasn't updated recently, querying aws"
+        get_instances_from_aws
+    fi
+}
+
+is_cache_fresh() {
+    if [[ "$(find "$CACHE_FILE_PATH" -mmin -$((60*${CACHE_EXPIRY_HOURS})) 2>/dev/null | xargs )" != "" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+get_instances_from_cache() {
+    if [[ $arg_instance_id = 1 ]]; then
+        nodes=$(cat $CACHE_FILE_PATH | jq "map(select(.id == \"${identifier}\"))")
+    else
+        nodes=$(cat $CACHE_FILE_PATH | jq "map(select(.service | test(\".*${identifier}.*\")))")
+    fi
+
+    nodes="$(echo "${nodes}" | jq 'sort_by(.service)')"
+    [[ "${arg_verybose}" = 1 ]] && echo -e "[spoon] instances returned from the cache:\\n${nodes}"
+
+    node_count=$(echo "${nodes}" | jq '. | length')
+    if [[ "${node_count}" -eq 0 ]]; then
+        echo "No instances found for identifier '${identifier}'."
+        exit 1
+    fi
+}
+
+get_instances_from_aws() {
     if [[ $arg_instance_id = 1 ]]; then
         nodes=$(query_aws_by_id "$identifier")
     else
@@ -100,7 +139,7 @@ spoon_get_instances_from_aws() {
     # I don't want to cram the entire if statement into the condition of another one
     # shellcheck disable=SC2181
     if [[ "$?" -ne 0 ]]; then
-        echo "Encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests."
+        echo "[spoon] Encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests."
         exit 1
     fi
 
@@ -120,7 +159,9 @@ query_aws() {
     # passed literally, not interpolated - disable relevant shellcheck rule.
     # shellcheck disable=SC2016
     if nodes="$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}")"; then
-        echo "${nodes}"
+        # TODO if possible, this filtering should already be done as part of the query
+        nodes_with_service_name="$(echo "${nodes}" | jq 'map(select(.service != "null" and .service != null))')"
+        echo "${nodes_with_service_name}"
     else
         return 1
     fi
@@ -172,11 +213,12 @@ spoon_select_from_multiple() {
         echo "*)  all"
         read -rp '==> ' reply
         if [[ "${reply}" = "" ]]; then
-            verbose_log "[spoon] no instances selected; spoon will now exit."
-            exit 0
+            verbose_log "[spoon] no instances selected"
+            nodes='[]'
+            return
         fi
         if [[ "${reply}" = '*' ]]; then
-            verbose_log all instances selected
+            verbose_log "[spoon] all instances selected"
         else
             jq_range_expression="$(jqrangify "${reply}")"
             [[ "${arg_verybose}" = 1 ]] && echo "[spoon] jq range expression: ${jq_range_expression}"
@@ -186,8 +228,9 @@ spoon_select_from_multiple() {
             fi
             node_count=$(echo "${nodes}" | jq '. | length')
             if [[ "${node_count}" -eq 0 ]]; then
-                echo "[spoon] no instances selected; spoon will now exit."
-                exit 0
+                echo "[spoon] no instances selected"
+                nodes='[]'
+                return
             fi
             [[ "${arg_verybose}" = 1 ]] && echo -e "[spoon] selected instances:\\n${nodes}"
         fi
@@ -223,7 +266,7 @@ spoon_ssh() {
         verbose_log "[spoon] IP addresses:"
         [[ "${arg_verbose}" = 1 ]] && for ip in ${ips}; do echo "${ip}"; done
         ssh_multiple "${ips}"
-    else
+    elif [[ "${node_count}" -eq 1 ]]; then
         ip=$(echo "${nodes}" | jq '.[0].ip' | tr -d '"')
         verbose_log "[spoon] IP address: ${ip}"
         ssh_single -o StrictHostKeyChecking=no -l root  "${ip}"
@@ -276,13 +319,16 @@ check_cssh_availability() {
 ################################################################################################
 
 spoon_build_cache() {
-    verbose_log "[spoon] building cache in the background..."
-    cache_file_path=~/.cache/spoon_aws_cache
-    pull_every_node_from_aws &
+    if ! is_cache_fresh; then
+        verbose_log "[spoon] building cache in the background..."
+        cache_nodes_from_aws &
+    else
+        verbose_log "[spoon] cache is up-to-date, no further action needed"
+    fi
 }
 
-pull_every_node_from_aws() {
-    nodes="$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}" > ~/.cache/spoon_aws_cache)"
+cache_nodes_from_aws() {
+    nodes="$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' | jq 'map(select(.service != "null" and .service != null))' > "${CACHE_FILE_PATH}")"
 }
 
 ################################################################################################
@@ -296,7 +342,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     spoon_check_args
     spoon_verbose_print_args
 
-    spoon_get_instances_from_aws
+    spoon_get_instances
     spoon_filter_for_environment
     spoon_filter_for_first
     spoon_select_from_multiple

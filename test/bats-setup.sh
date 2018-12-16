@@ -6,7 +6,7 @@ source "$BATS_TEST_DIRNAME/lib/bats-assert/load.bash"
 source "$BATS_TEST_DIRNAME/lib/bats-mock/src/bats-mock.bash"
 source "$BATS_TEST_DIRNAME/lib/bats-utils.bash"
 
-# create mocks and export mock utility functions
+# setup test environment
 setup() {
 	export mock_aws_path="$(mock_create)"
 	export mock_ssh_path="$(mock_create)"
@@ -14,19 +14,14 @@ setup() {
 	export mock_i2cssh_path="$(mock_create)"
 	export mock_command_path="$(mock_create)"
 
+	export -f aws ssh csshx i2cssh command
+
 	spoon="$BATS_TEST_DIRNAME/../spoon"
 
-	export -f aws ssh csshx i2cssh command
+	rm -f ~/.cache/spoon_aws_cache.json
 }
 
-
-# allow printing debug output during tests, call with 'make debug'
-debug() {
-	echo "# ${@}" 1>&3
-}
-
-
-# mock out programs called by spoon
+# overwrite executables with mocks
 aws() {
 	bash "${mock_aws_path}" "${@}"
 }

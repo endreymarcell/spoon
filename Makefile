@@ -1,10 +1,10 @@
 .PHONY: test debug lint
 
 test:
-	bats test/*.bats
+	docker run -v "${PWD}:/spoon" endreymarca/bats-ext
 
 debug:
-	bats -t test/*.bats | grep '^# '
+	docker run -ti -v "${PWD}:/spoon" endreymarca/bats-ext bash
 
 lint:
 	shellcheck spoon

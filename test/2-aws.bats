@@ -22,7 +22,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 
     run $spoon foo
 
-    assert_line "Encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests."
+    assert_line "[spoon] Encountered an error while using awscli. Please make sure it's installed and you are authorized to make requests."
     assert_failure
 }
 
