@@ -14,6 +14,18 @@ spoon_usage_and_help() {
 
 print_help() {
     echo "usage: spoon [flags] <identifier>"
+    echo flags:
+    echo "-h, --help             display this message and exit"
+    echo "-i, --instance-id      specify instance-id instead of service name"
+    echo "-p, --preprod          preprod instances only"
+    echo "-P, --prod             production instances only"
+    echo "-1, --first            if there are multiple matching instances, select the first one without a prompt"
+    echo "-a, --all              if there are multiple matching instances, select all of them without a prompt"
+    echo "-n, --dry-run          list instances, but don't call ssh"
+    echo "-d, --docker           enter the docker container of the application"
+    echo "-r, --no-cache-read    don't try to read the cache file"
+    echo "-w, --no-cache-write   don't write the cache file"
+    echo "-v, --verbose          debug logging"
 }
 
 verbose_log() {
