@@ -91,8 +91,8 @@ spoon_check_args() {
     fi
 }
 
-spoon_verbose_print_args() {
-    if [[ "${arg_verbose}" = 1 ]]; then
+spoon_verybose_print_args() {
+    if [[ "${arg_verybose}" = 1 ]]; then
         echo "[spoon] identifier=${identifier}"
         echo "[spoon] arg_instance_id=${arg_instance_id}"
         echo "[spoon] arg_preprod=${arg_preprod}"
@@ -376,7 +376,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 
     spoon_set_args "${@}"
     spoon_check_args
-    spoon_verbose_print_args
+    spoon_verybose_print_args
 
     spoon_get_instances
     spoon_filter_for_environment
