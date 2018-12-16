@@ -18,7 +18,7 @@ setup() {
 
 	spoon="$BATS_TEST_DIRNAME/../spoon"
 
-	rm -f ~/.cache/spoon_aws_cache.json
+	rm -f ~/.cache/spoon_aws_cache.json{,.tmp}
 }
 
 # overwrite executables with mocks
