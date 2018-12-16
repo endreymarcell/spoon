@@ -37,6 +37,12 @@ __Options:__
 &nbsp;&nbsp;&nbsp;&nbsp;if there are multiple instances, select the first one without a prompt  
 `-a` or `--all`  
 &nbsp;&nbsp;&nbsp;&nbsp;if there are multiple instances, select all of them without a prompt  
+`-d` or `--docker`  
+&nbsp;&nbsp;&nbsp;&nbsp;enter the docker container of the application on the instance  
+`-r` or `--no-cache-read`  
+&nbsp;&nbsp;&nbsp;&nbsp;don't try to read instances from the cache  
+`-w` or `--no-cache-write`  
+&nbsp;&nbsp;&nbsp;&nbsp;don't cache instances  
 
 __Identifier:__  
 Either (the part of) a service name, or the instance ID (if the `-i` flag is provided).  
