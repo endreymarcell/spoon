@@ -98,6 +98,16 @@ cache=~/.cache/spoon_aws_cache.json
 	assert_equal "$(cat $cache)" ""
 }
 
+@test "If there is a recent cache file but refresh is requested, spoon does build one after running." {
+	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/single.json)" 1
+	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)" 2
+	touch $cache
+
+	run $spoon -r foo
+
+	assert_equal "$(cat $cache | jq .)" "$(cat $BATS_TEST_DIRNAME/data/multiple.json | jq .)"
+}
+
 @test "If there is no cache file but cache writing is disabled, spoon does not build one after running." {
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/single.json)"
 
