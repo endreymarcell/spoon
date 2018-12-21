@@ -28,7 +28,6 @@ cache=~/.cache/spoon_aws_cache.json
 
 @test "If there is an invalid cache file, spoon queries aws." {
 	echo invalid data > $cache
-	touch $cache
 
 	run $spoon foo
 
