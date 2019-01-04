@@ -190,7 +190,7 @@ query_aws() {
     # The backticks are part of the JMESPath expression and should be
     # passed literally, not interpolated - disable relevant shellcheck rule.
     # shellcheck disable=SC2016
-    if nodes="$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' "${@}")"; then
+    if nodes="$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, publicIp: PublicIpAddress, privateIp: PrivateIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0], vpc: VpcId}[0]' "${@}")"; then
         # TODO if possible, this filtering should already be done as part of the query
         nodes_with_service_name="$(echo "${nodes}" | jq 'map(select(.service != "null" and .service != null))')"
         echo "${nodes_with_service_name}"
@@ -241,7 +241,7 @@ spoon_filter_for_first() {
 
 spoon_select_from_multiple() {
     if [[ $arg_all = 0 ]] && [[ $node_count -gt 1 ]]; then
-        nodes_data="$(echo "${nodes}" | jq '.[] | .id + " " + .service + " " + .ip + " (" + .state + ")"' | tr -d '\"')"
+        nodes_data="$(echo "${nodes}" | jq '.[] | .id + " " + .service + " " + .publicIp + " (" + .state + ")"' | tr -d '\"')"
         echo "${nodes_data}"| nl '-s) ' | column -t
         echo "*)  all"
         read -rp '==> ' reply
@@ -295,12 +295,12 @@ spoon_ssh() {
     node_count=$(echo "${nodes}" | jq '. | length')
     verbose_log "[spoon] number of instances: ${node_count}"
     if [[ "${node_count}" -gt 1 ]]; then
-        ips=$(echo "${nodes}" | jq '.[].ip' | tr -d '"' | xargs)
+        ips=$(echo "${nodes}" | jq '.[].publicIp' | tr -d '"' | xargs)
         verbose_log "[spoon] IP addresses:"
         [[ "${arg_verbose}" = 1 ]] && for ip in ${ips}; do echo "${ip}"; done
         ssh_multiple "${ips}"
     elif [[ "${node_count}" -eq 1 ]]; then
-        ip=$(echo "${nodes}" | jq '.[0].ip' | tr -d '"')
+        ip=$(echo "${nodes}" | jq '.[0].publicIp' | tr -d '"')
         verbose_log "[spoon] IP address: ${ip}"
         ssh_single -o StrictHostKeyChecking=no -l root  "${ip}"
     fi
@@ -369,7 +369,7 @@ spoon_build_cache() {
 cache_nodes_from_aws() {
     # the linter incorrectly assumes that I want to expand an expression here
     # shellcheck disable=SC2016
-    aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, ip: PublicIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0]}[0]' | jq 'map(select(.service != "null" and .service != null))' > "${CACHE_FILE_PATH}.tmp"
+    aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, publicIp: PublicIpAddress, privateIp: PrivateIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0], vpc: VpcId}[0]' | jq 'map(select(.service != "null" and .service != null))' > "${CACHE_FILE_PATH}.tmp"
     mv "${CACHE_FILE_PATH}.tmp" "${CACHE_FILE_PATH}"
 }
 

@@ -1,55 +1,73 @@
 [
     {
         "id": "i-abcd1234",
-        "ip": "1.1.1.1",
+        "publicIp": "1.1.1.1",
+        "privateIp": "192.168.100.1",
+        "vpc": null,
         "service": "1-fooservice",
         "state": "running"
     },
     {
         "id": "i-abcd2345",
-        "ip": "2.2.2.2",
+        "publicIp": "2.2.2.2",
+        "privateIp": "192.168.100.2",
+        "vpc": null,
         "service": "2-fooservice",
         "state": "running"
     },
     {
         "id": "i-abcd3456",
-        "ip": "3.3.3.3",
+        "publicIp": "3.3.3.3",
+        "privateIp": "192.168.100.3",
+        "vpc": null,
         "service": "3-fooservice",
         "state": "running"
     },
     {
         "id": "i-abcd4567",
-        "ip": "4.4.4.4",
+        "publicIp": "4.4.4.4",
+        "privateIp": "192.168.100.4",
+        "vpc": null,
         "service": "4-fooservice",
         "state": "running"
     },
     {
         "id": "i-abcd5678",
-        "ip": "5.5.5.5",
+        "publicIp": "5.5.5.5",
+        "privateIp": "192.168.100.5",
+        "vpc": null,
         "service": "5-fooservice",
         "state": "running"
     },
     {
         "id": "i-abcd6789",
-        "ip": "6.6.6.6",
+        "publicIp": "6.6.6.6",
+        "privateIp": "192.168.100.6",
+        "vpc": null,
         "service": "6-fooservice",
         "state": "running"
     },
     {
         "id": "i-abcd7890",
-        "ip": "7.7.7.7",
+        "publicIp": "7.7.7.7",
+        "privateIp": "192.168.100.7",
+        "vpc": null,
         "service": "7-fooservice",
         "state": "running"
     },
     {
         "id": "i-abcd890A",
-        "ip": "8.8.8.8",
+        "publicIp": "8.8.8.8",
+        "privateIp": "192.168.100.8",
+        "vpc": null,
         "service": "8-fooservice",
         "state": "running"
     },
     {
         "id": "i-abcd90AB",
-        "ip": "9.9.9.9",
+        "publicIp": "9.9.9.9",
+        "privateIp": "192.168.100.9",
+        "vpc": null,
         "service": "9-fooservice",
         "state": "running"
     }

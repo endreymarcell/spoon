@@ -1,19 +1,25 @@
 [
     {
         "id": "i-abcd1234",
-        "ip": "1.1.1.1",
+        "publicIp": "1.1.1.1",
+        "privateIp": "192.168.100.1",
+        "vpc": null,
         "service": "fooservice",
         "state": "running"
     },
     {
         "id": "i-abcd2345",
-        "ip": "2.2.2.2",
+        "publicIp": "2.2.2.2",
+        "privateIp": "192.168.100.2",
+        "vpc": null,
         "service": "fooservice",
         "state": "running"
     },
     {
         "id": "i-abcd3456",
-        "ip": "3.3.3.3",
+        "publicIp": "3.3.3.3",
+        "privateIp": "192.168.100.3",
+        "vpc": null,
         "service": "fooservice",
         "state": "running"
     }
