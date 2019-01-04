@@ -27,8 +27,6 @@ __Options:__
 &nbsp;&nbsp;&nbsp;&nbsp;enable verbose logging  
 `-n` or `--dry-run`  
 &nbsp;&nbsp;&nbsp;&nbsp;print selected IPs but don't initiate SSH connection  
-`-i` or `--instance-id`  
-&nbsp;&nbsp;&nbsp;&nbsp;find instance by id rather than service name  
 `-p` or `--preprod`  
 &nbsp;&nbsp;&nbsp;&nbsp;filter for preprod instances  
 `-P` or `--prod`  
@@ -45,7 +43,7 @@ __Options:__
 &nbsp;&nbsp;&nbsp;&nbsp;don't cache instances  
 
 __Identifier:__  
-Either (the part of) a service name, or the instance ID (if the `-i` flag is provided).  
+If the identifier starts with `i-`, it is recognised as an instence-id. Otherwise, it's taken to be a service name, or at least part of it.
 
 ## Contribution
 Pull requests are welcome.  

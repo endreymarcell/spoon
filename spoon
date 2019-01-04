@@ -16,7 +16,6 @@ print_help() {
     echo "usage: spoon [flags] <identifier>"
     echo flags:
     echo "-h, --help             display this message and exit"
-    echo "-i, --instance-id      specify instance-id instead of service name"
     echo "-p, --preprod          preprod instances only"
     echo "-P, --prod             production instances only"
     echo "-1, --first            if there are multiple matching instances, select the first one without a prompt"
@@ -43,7 +42,6 @@ spoon_set_args() {
         exit 1
     fi
 
-    if has_short_flag i "$@" || has_long_flag instance-id "$@"; then arg_instance_id=1; else arg_instance_id=0; fi
     if has_short_flag p "$@" || has_long_flag preprod "$@"; then arg_preprod=1; else arg_preprod=0; fi
     if has_short_flag P "$@" || has_long_flag prod "$@"; then arg_prod=1; else arg_prod=0; fi
     if has_short_flag 1 "$@" || has_long_flag first "$@"; then arg_first=1; else arg_first=0; fi
@@ -94,7 +92,6 @@ spoon_check_args() {
 spoon_verybose_print_args() {
     if [[ "${arg_verybose}" = 1 ]]; then
         echo "[spoon] identifier=${identifier}"
-        echo "[spoon] arg_instance_id=${arg_instance_id}"
         echo "[spoon] arg_preprod=${arg_preprod}"
         echo "[spoon] arg_prod=${arg_prod}"
         echo "[spoon] arg_first=${arg_first}"
@@ -140,8 +137,16 @@ is_cache_valid() {
     jq . "$CACHE_FILE_PATH" >/dev/null 2>&1
 }
 
+is_identifier_instance_id() {
+    if [[ "${identifier:0:2}" = i- ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 get_instances_from_cache() {
-    if [[ $arg_instance_id = 1 ]]; then
+    if is_identifier_instance_id; then
         nodes=$(jq "map(select(.id == \"${identifier}\"))" $CACHE_FILE_PATH)
     else
         nodes=$(jq "map(select(.service | test(\".*${identifier}.*\")))" $CACHE_FILE_PATH)
@@ -158,7 +163,7 @@ get_instances_from_cache() {
 }
 
 get_instances_from_aws() {
-    if [[ $arg_instance_id = 1 ]]; then
+    if is_identifier_instance_id; then
         nodes=$(query_aws_by_id "$identifier")
     else
         nodes=$(query_aws_by_name "$identifier")
@@ -199,6 +204,7 @@ query_aws_by_name() {
 }
 
 query_aws_by_id() {
+    verbose_log "query aws by id"
     query_aws --instance-ids "$1"
 }
 
