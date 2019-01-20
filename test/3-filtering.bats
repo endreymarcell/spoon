@@ -64,7 +64,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -1 foo
 
     assert_failure
-    assert_output "No instances found for identifier 'foo'."
+    assert_output "No instances returned from AWS for identifier 'foo'."
 }
 
 @test "First instance flag with one instance" {
@@ -93,7 +93,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -a foo
 
     assert_failure
-    assert_output "No instances found for identifier 'foo'."
+    assert_output "No instances returned from AWS for identifier 'foo'."
 }
 
 @test "All instances flag with one instance" {
