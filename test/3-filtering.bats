@@ -115,3 +115,12 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     assert_equal $(mock_get_call_num $mock_csshx_path) 1
     assert_equal_regex "$(mock_get_call_args $mock_csshx_path)" '1.1.1.1 2.2.2.2 3.3.3.3'
 }
+
+@test "Private IP is printed for VPC instances" {
+    mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple-vpc.json)"
+
+    run $spoon foo <<< ''
+
+    assert_success
+    assert_output "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-vpc)"
+}
