@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
 spoon_usage_and_help() {
-    if [[ $# -lt 1 ]]; then
+    if [[ ${#spoon_args[@]} -lt 1 ]]; then
         print_help
         exit 1
     fi
 
-    if has_short_flag h "$@" || has_long_flag help "$@"; then
+    if has_short_flag h "${spoon_args[@]}" || has_long_flag help "${spoon_args[@]}"; then
         print_help
         exit 0
     fi
@@ -35,23 +35,23 @@ verbose_log() {
 ################################################################################################
 
 spoon_set_args() {
-    identifier="${*: -1}"
+    identifier="${spoon_args[-1]}"
 
     if [[ "${identifier}" =~ ^- ]]; then
         echo identifier must not be empty
         exit 1
     fi
 
-    if has_short_flag p "$@" || has_long_flag preprod "$@"; then arg_preprod=1; else arg_preprod=0; fi
-    if has_short_flag P "$@" || has_long_flag prod "$@"; then arg_prod=1; else arg_prod=0; fi
-    if has_short_flag 1 "$@" || has_long_flag first "$@"; then arg_first=1; else arg_first=0; fi
-    if has_short_flag a "$@" || has_long_flag all "$@"; then arg_all=1; else arg_all=0; fi
-    if has_short_flag n "$@" || has_long_flag dry-run "$@"; then arg_dry_run=1; else arg_dry_run=0; fi
-    if has_short_flag d "$@" || has_long_flag docker "$@"; then arg_docker=1; else arg_docker=0; fi
-    if has_short_flag r "$@" || has_long_flag no-cache-read "$@"; then arg_no_cache_read=1; else arg_no_cache_read=0; fi
-    if has_short_flag w "$@" || has_long_flag no-cache-write "$@"; then arg_no_cache_write=1; else arg_no_cache_write=0; fi
-    if has_short_flag v "$@" || has_long_flag verbose "$@"; then arg_verbose=1; else arg_verbose=0; fi
-    if has_short_flag V "$@"; then arg_verbose=1 && arg_verybose=1; else arg_verybose=0; fi
+    if has_short_flag p "${spoon_args[@]}" || has_long_flag preprod "${spoon_args[@]}"; then arg_preprod=1; else arg_preprod=0; fi
+    if has_short_flag P "${spoon_args[@]}" || has_long_flag prod "${spoon_args[@]}"; then arg_prod=1; else arg_prod=0; fi
+    if has_short_flag 1 "${spoon_args[@]}" || has_long_flag first "${spoon_args[@]}"; then arg_first=1; else arg_first=0; fi
+    if has_short_flag a "${spoon_args[@]}" || has_long_flag all "${spoon_args[@]}"; then arg_all=1; else arg_all=0; fi
+    if has_short_flag n "${spoon_args[@]}" || has_long_flag dry-run "${spoon_args[@]}"; then arg_dry_run=1; else arg_dry_run=0; fi
+    if has_short_flag d "${spoon_args[@]}" || has_long_flag docker "${spoon_args[@]}"; then arg_docker=1; else arg_docker=0; fi
+    if has_short_flag r "${spoon_args[@]}" || has_long_flag no-cache-read "${spoon_args[@]}"; then arg_no_cache_read=1; else arg_no_cache_read=0; fi
+    if has_short_flag w "${spoon_args[@]}" || has_long_flag no-cache-write "${spoon_args[@]}"; then arg_no_cache_write=1; else arg_no_cache_write=0; fi
+    if has_short_flag v "${spoon_args[@]}" || has_long_flag verbose "${spoon_args[@]}"; then arg_verbose=1; else arg_verbose=0; fi
+    if has_short_flag V "${spoon_args[@]}"; then arg_verbose=1 && arg_verybose=1; else arg_verybose=0; fi
 }
 
 has_short_flag() {
@@ -378,9 +378,10 @@ cache_nodes_from_aws() {
 ################################################################################################
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    spoon_usage_and_help "${@}"
+    spoon_args=( "${@}" )
+    spoon_usage_and_help
 
-    spoon_set_args "${@}"
+    spoon_set_args
     spoon_check_args
     spoon_verybose_print_args
 
