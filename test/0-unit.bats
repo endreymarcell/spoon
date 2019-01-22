@@ -4,7 +4,8 @@ source "$BATS_TEST_DIRNAME/lib/bats-support/load.bash"
 source "$BATS_TEST_DIRNAME/lib/bats-assert/load.bash"
 source "$BATS_TEST_DIRNAME/lib/bats-utils.bash"
 
-source "$BATS_TEST_DIRNAME/../spoon"
+source "$BATS_TEST_DIRNAME/../lib/args.bash"
+source "$BATS_TEST_DIRNAME/../lib/select.bash"
 
 @test "has_short_flag" {
     assert_function_failure has_short_flag x spoon foo
