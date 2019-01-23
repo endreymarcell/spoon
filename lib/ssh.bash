@@ -33,7 +33,7 @@ check_vpc() {
 }
 
 ssh_multiple_vpc() {
-    verbose_log All nodes are in VPC.
+    verbose_log [spoon] All nodes are in VPC.
     ips=$(echo "${nodes}" | jq '.[].privateIp' | tr -d '"' | xargs)
     verbose_log "[spoon] IP addresses:"
     [[ "${arg_verbose}" = 1 ]] && for ip in ${ips}; do echo "${ip}"; done
@@ -42,7 +42,7 @@ ssh_multiple_vpc() {
 }
 
 ssh_multiple_non_vpc() {
-    verbose_log None of the nodes are in VPC.
+    verbose_log [spoon] None of the nodes are in VPC.
     ips=$(echo "${nodes}" | jq '.[].publicIp' | tr -d '"' | xargs)
     verbose_log "[spoon] IP addresses:"
     [[ "${arg_verbose}" = 1 ]] && for ip in ${ips}; do echo "${ip}"; done
@@ -78,15 +78,24 @@ check_cssh_availability() {
 }
 
 ssh_single_vpc() {
-    verbose_log The selected node is in VPC.
+    verbose_log [spoon] The selected node is in VPC.
     ip=$(echo "${nodes}" | jq '.[0].privateIp' | tr -d '"')
     verbose_log "[spoon] IP address: ${ip}"
-    echo to be implemented
-    exit 1
+    vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
+    verbose_log "[spoon] VPC: ${vpc}" 
+    vpc_command="$(jq ".vpcCommands[\"$vpc\"]" ~/.spoon/config.json | tr -d '"')"
+    [[ $arg_verybose = 1 ]] && echo "[spoon] VPC command: $vpc_command"
+    [[ "${arg_dry_run}" = 1 ]] && return
+    verbose_log "[spoon] calling ssh"
+    if [[ "${arg_docker}" = 1 ]]; then
+        ssh -o StrictHostKeyChecking=no $vpc_command "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
+    else
+        ssh -o StrictHostKeyChecking=no $vpc_command "${ip}"
+    fi
 }
 
 ssh_single_non_vpc() {
-    verbose_log The selected node is not in VPC.
+    verbose_log [spoon] The selected node is not in VPC.
     ip=$(echo "${nodes}" | jq '.[0].publicIp' | tr -d '"')
     verbose_log "[spoon] IP address: ${ip}"
     [[ "${arg_dry_run}" = 1 ]] && return
