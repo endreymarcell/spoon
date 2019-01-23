@@ -7,4 +7,5 @@ RUN git clone --depth 1 https://github.com/bats-core/bats-core.git /tmp/bats-cor
 
 RUN mkdir ~/.cache
 
-CMD bats /spoon/test/*.bats
+WORKDIR /spoon
+CMD bats test/*.bats
