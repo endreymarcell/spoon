@@ -47,5 +47,5 @@ If the identifier starts with `i-`, it is recognised as an instence-id. Otherwis
 
 ## Contribution
 Pull requests are welcome.  
-Run tests with `make test` (requires [bats-core](https://github.com/bats-core/bats-core)) and the linter with `make lint` (requires [shellcheck](https://github.com/koalaman/shellcheck)).  
+Run tests with `make test` (requires Docker) and the linter with `make lint` (requires [shellcheck](https://github.com/koalaman/shellcheck)).  
 There's also a [CircleCI job](https://circleci.com/gh/endreymarcell/spoon).
