@@ -12,7 +12,7 @@ jobs:
             git submodule update --remote
       - run:
           name: Lint with shellcheck
-          command: shellcheck spoon
+          command: shellcheck -x spoon
       - run:
           name: Run bats test suite
           command: bats test/*.bats
