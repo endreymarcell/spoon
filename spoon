@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-CACHE_FILE_PATH=~/.cache/spoon_aws_cache.json
-CACHE_EXPIRY_HOURS=24
-
 source lib/utils.bash
 source lib/usage.bash
 source lib/args.bash

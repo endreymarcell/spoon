@@ -18,30 +18,6 @@ spoon_set_args() {
     if has_short_flag V "${spoon_args[@]}"; then arg_verbose=1 && arg_verybose=1; else arg_verybose=0; fi
 }
 
-has_short_flag() {
-    flag="$1"
-    shift
-    args="$*"
-    for arg in $args; do
-        if [ "${arg:0:1}" = - ] && [ "${arg:1:1}" != - ] && [[ "$arg" =~ $flag ]]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
-has_long_flag() {
-    flag="$1"
-    shift
-    args="$*"
-    for arg in $args; do
-        if [ "${arg:0:2}" = -- ] && [[ "$arg" == "--$flag" ]]; then
-            return 0
-        fi
-    done
-    return 1
-}
-
 spoon_check_args() {
     if [[ "${arg_prod}" = 1 ]] && [[ "${arg_preprod}" = 1 ]]; then
         echo "Invalid arguments: -P/--prod and -p/--preprod are mutually exclusive."

@@ -28,21 +28,3 @@ spoon_select_from_multiple() {
         fi
     fi
 }
-
-jqrangify() {
-    # The easiest way I found to select multiple items, including ranges, from the array
-    # is converting all indices to jq range expressions to extract subarrays
-    # and adding these all together.
-    # e.g '1, 3, 5-10' --> jq '.[0:1] + .[2:3] + .[4:10]'
-    expr=""
-    for item in $(echo "${*}" | tr , ' '); do
-        # note: for single numbers 'lower' and 'upper' end up being the same
-        lower="${item//-*/}"
-        upper="${item//*-/}"
-        # arrays are 0-indexed, spoon numbers instances from 1, hence the substraction
-        jqrangified_item="$((lower - 1)):${upper}"
-        expr="${expr} .[${jqrangified_item}] +"
-    done
-    # append [] at the end to deal with the trailing + sign
-    echo "${expr} []" | xargs
-}

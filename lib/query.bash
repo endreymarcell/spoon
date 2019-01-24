@@ -15,18 +15,6 @@ spoon_get_instances() {
     fi
 }
 
-is_cache_fresh() {
-    if [[ "$(find "$CACHE_FILE_PATH" -mmin -$((60*CACHE_EXPIRY_HOURS)) -print0 2>/dev/null | xargs -0)" != "" ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-is_cache_valid() {
-    jq . "$CACHE_FILE_PATH" >/dev/null 2>&1
-}
-
 is_identifier_instance_id() {
     if [[ "${identifier:0:2}" = i- ]]; then
         return 0

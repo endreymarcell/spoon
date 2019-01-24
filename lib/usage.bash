@@ -24,7 +24,3 @@ print_help() {
     echo "-w, --no-cache-write   don't write the cache file"
     echo "-v, --verbose          debug logging"
 }
-
-verbose_log() {
-    [[ "${arg_verbose}" = 1 ]] && echo -e "${@}" >&2
-}
