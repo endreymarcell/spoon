@@ -33,12 +33,34 @@ check_vpc() {
 }
 
 ssh_multiple_vpc() {
-    verbose_log [spoon] All nodes are in VPC.
+    verbose_log "[spoon] All nodes are in VPC."
+    
     ips=$(echo "${nodes}" | jq '.[].privateIp' | tr -d '"' | xargs)
     verbose_log "[spoon] IP addresses:"
     [[ "${arg_verbose}" = 1 ]] && for ip in ${ips}; do echo "${ip}"; done
-    echo to be implemented
-    exit 1
+    
+    check_cssh_availability
+    
+    vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
+    verbose_log "[spoon] VPC: ${vpc}" 
+    [[ $arg_verybose = 1 ]] && echo "[spoon] VPC jump hosts:" && jq ".vpcJumphosts[\"$vpc\"]" ~/.spoon/config.json
+    
+    if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
+        jumphosts="$(jq ".vpcJumphosts[\"$vpc\"] | map(\"root@\" + .) | join(\",\")" ~/.spoon/config.json | tr -d '"')"
+        [[ "${arg_dry_run}" = 1 ]] && echo "[spoon] dry run, not calling i2cssh" && return
+        verbose_log "[spoon] calling i2cssh"
+        # I actually need the word splitting here, hence the lack of quotes
+        # shellcheck disable=SC2086
+        echo i2cssh -XJ="$jumphosts" -Xl=root $ips
+        echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
+    else
+        jumphosts="$(jq ".vpcJumphosts[\"$vpc\"] | map(\"root@\" + .) | join(\",\")" ~/.spoon/config.json | tr -d '"')"
+        [[ "${arg_dry_run}" = 1 ]] && echo "[spoon] dry run, not calling csshx" && return
+        verbose_log "[spoon] calling csshx"
+        # I actually need the word splitting here, hence the lack of quotes
+        # shellcheck disable=SC2086
+        csshx --ssh_args "-J $jumphosts -l root" $ips
+    fi
 }
 
 ssh_multiple_non_vpc() {
