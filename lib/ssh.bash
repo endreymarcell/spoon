@@ -42,19 +42,21 @@ ssh_multiple_vpc() {
     check_cssh_availability
     
     vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
-    verbose_log "[spoon] VPC: ${vpc}" 
-    [[ $arg_verybose = 1 ]] && echo "[spoon] VPC jump hosts:" && jq ".vpcJumphosts[\"$vpc\"]" ~/.spoon/config.json
+    verbose_log "[spoon] VPC ID: ${vpc}" 
+    if ! vpc_config="$(get_config ".vpcJumphosts[\"$vpc\"]")"; then
+        exit 1
+    fi
+    [[ $arg_verybose = 1 ]] && echo "[spoon] VPC jumphost config:" && echo "$vpc_config"
+    jumphosts="$(echo "$vpc_config" | jq 'map("root@" + .) | join(",")' | tr -d '"')"
     
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
-        jumphosts="$(jq ".vpcJumphosts[\"$vpc\"] | map(\"root@\" + .) | join(\",\")" ~/.spoon/config.json | tr -d '"')"
         [[ "${arg_dry_run}" = 1 ]] && echo "[spoon] dry run, not calling i2cssh" && return
         verbose_log "[spoon] calling i2cssh"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
-        echo i2cssh -XJ="$jumphosts" -Xl=root $ips
+        i2cssh -XJ="$jumphosts" -Xl=root $ips
         echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
     else
-        jumphosts="$(jq ".vpcJumphosts[\"$vpc\"] | map(\"root@\" + .) | join(\",\")" ~/.spoon/config.json | tr -d '"')"
         [[ "${arg_dry_run}" = 1 ]] && echo "[spoon] dry run, not calling csshx" && return
         verbose_log "[spoon] calling csshx"
         # I actually need the word splitting here, hence the lack of quotes
@@ -105,14 +107,20 @@ ssh_single_vpc() {
     verbose_log "[spoon] IP address: ${ip}"
     vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
     verbose_log "[spoon] VPC: ${vpc}" 
-    vpc_command="$(jq ".vpcCommands[\"$vpc\"]" ~/.spoon/config.json | tr -d '"')"
-    [[ $arg_verybose = 1 ]] && echo "[spoon] VPC command: $vpc_command"
-    [[ "${arg_dry_run}" = 1 ]] && return
+    if ! vpc_config="$(get_config ".vpcJumphosts[\"$vpc\"]")"; then
+        exit 1
+    fi
+    [[ $arg_verybose = 1 ]] && echo "[spoon] VPC jumphost config:" && echo "$vpc_config"
+    jumphosts="$(echo "$vpc_config" | jq 'map("root@" + .) | join(",")' | tr -d '"')"
+    if [[ "${arg_dry_run}" = 1 ]]; then
+        verbose_log "[spoon] Dry run, not calling SSH."
+        return
+    fi
     verbose_log "[spoon] calling ssh"
     if [[ "${arg_docker}" = 1 ]]; then
-        ssh -o StrictHostKeyChecking=no $vpc_command "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
+        ssh -o StrictHostKeyChecking=no -J $jumphosts -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
     else
-        ssh -o StrictHostKeyChecking=no $vpc_command "${ip}"
+        ssh -o StrictHostKeyChecking=no -J $jumphosts -l root "${ip}"
     fi
 }
 
@@ -120,7 +128,10 @@ ssh_single_non_vpc() {
     verbose_log [spoon] The selected node is not in VPC.
     ip=$(echo "${nodes}" | jq '.[0].publicIp' | tr -d '"')
     verbose_log "[spoon] IP address: ${ip}"
-    [[ "${arg_dry_run}" = 1 ]] && return
+    if [[ "${arg_dry_run}" = 1 ]]; then
+        verbose_log "[spoon] Dry run, not calling SSH."
+        return
+    fi
     verbose_log "[spoon] calling ssh"
     if [[ "${arg_docker}" = 1 ]]; then
         ssh -o StrictHostKeyChecking=no -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
