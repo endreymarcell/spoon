@@ -7,4 +7,4 @@ debug:
 	docker run -ti -v "${PWD}:/spoon" endreymarca/bats-ext bash
 
 lint:
-	shellcheck -x spoon
+	shellcheck -x spoon lib/*

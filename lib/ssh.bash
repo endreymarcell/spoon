@@ -1,3 +1,11 @@
+#!/usr/bin/env bash
+
+declare nodes
+declare arg_verbose
+declare arg_verybose
+declare arg_dry_run
+declare arg_docker
+
 spoon_ssh() {
     node_count=$(echo "${nodes}" | jq '. | length')
     verbose_log "[spoon] number of instances: ${node_count}"
@@ -23,9 +31,9 @@ spoon_ssh() {
 check_vpc() {
     vpc_node_count=$(echo "${nodes}" | jq 'map(select(.vpc)) | length')
     non_vpc_node_count=$(echo "${nodes}" | jq 'map(select(.vpc == null)) | length')
-    if [[ $node_count = $vpc_node_count ]]; then
+    if [[ "$node_count" = "$vpc_node_count" ]]; then
         echo 1
-    elif [[ $node_count = $non_vpc_node_count ]]; then
+    elif [[ "$node_count" = "$non_vpc_node_count" ]]; then
         echo 0
     else
         return 1
@@ -66,7 +74,7 @@ ssh_multiple_vpc() {
 }
 
 ssh_multiple_non_vpc() {
-    verbose_log [spoon] None of the nodes are in VPC.
+    verbose_log "[spoon] None of the nodes are in VPC."
     ips=$(echo "${nodes}" | jq '.[].publicIp' | tr -d '"' | xargs)
     verbose_log "[spoon] IP addresses:"
     [[ "${arg_verbose}" = 1 ]] && for ip in ${ips}; do echo "${ip}"; done
@@ -102,7 +110,7 @@ check_cssh_availability() {
 }
 
 ssh_single_vpc() {
-    verbose_log [spoon] The selected node is in VPC.
+    verbose_log "[spoon] The selected node is in VPC."
     ip=$(echo "${nodes}" | jq '.[0].privateIp' | tr -d '"')
     verbose_log "[spoon] IP address: ${ip}"
     vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
@@ -118,14 +126,14 @@ ssh_single_vpc() {
     fi
     verbose_log "[spoon] calling ssh"
     if [[ "${arg_docker}" = 1 ]]; then
-        ssh -o StrictHostKeyChecking=no -J $jumphosts -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
+        ssh -o StrictHostKeyChecking=no -J "$jumphosts" -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
     else
-        ssh -o StrictHostKeyChecking=no -J $jumphosts -l root "${ip}"
+        ssh -o StrictHostKeyChecking=no -J "$jumphosts" -l root "${ip}"
     fi
 }
 
 ssh_single_non_vpc() {
-    verbose_log [spoon] The selected node is not in VPC.
+    verbose_log "[spoon] The selected node is not in VPC."
     ip=$(echo "${nodes}" | jq '.[0].publicIp' | tr -d '"')
     verbose_log "[spoon] IP address: ${ip}"
     if [[ "${arg_dry_run}" = 1 ]]; then

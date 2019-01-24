@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+declare arg_verbose
+
 CONFIG_FILE_PATH=~/.spoon/config.json
 CACHE_FILE_PATH=~/.cache/spoon_aws_cache.json
 CACHE_EXPIRY_HOURS=24
@@ -47,7 +51,7 @@ get_config() {
     if [[ ! -f "$CONFIG_FILE_PATH" ]]; then
         echo '{}' > $CONFIG_FILE_PATH
     fi
-    if ! $(jq . "$CONFIG_FILE_PATH" >/dev/null); then
+    if ! jq . "$CONFIG_FILE_PATH" >/dev/null; then
         echo "[spoon] Error: $CONFIG_FILE_PATH is not valid JSON" 1>&2
         exit 1
     fi

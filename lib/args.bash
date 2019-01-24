@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+
+declare spoon_args
+declare identifier
+
 spoon_set_args() {
     identifier="${spoon_args[-1]}"
 
@@ -15,6 +20,7 @@ spoon_set_args() {
     if has_short_flag r "${spoon_args[@]}" || has_long_flag no-cache-read "${spoon_args[@]}"; then arg_no_cache_read=1; else arg_no_cache_read=0; fi
     if has_short_flag w "${spoon_args[@]}" || has_long_flag no-cache-write "${spoon_args[@]}"; then arg_no_cache_write=1; else arg_no_cache_write=0; fi
     if has_short_flag v "${spoon_args[@]}" || has_long_flag verbose "${spoon_args[@]}"; then arg_verbose=1; else arg_verbose=0; fi
+    # shellcheck disable=SC2034
     if has_short_flag V "${spoon_args[@]}"; then arg_verbose=1 && arg_verybose=1; else arg_verybose=0; fi
 }
 

@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+declare spoon_args
+
 spoon_usage_and_help() {
     if [[ ${#spoon_args[@]} -lt 1 ]]; then
         print_help

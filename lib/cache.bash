@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+
+declare arg_no_cache_read
+declare arg_no_cache_write
+
 spoon_build_cache() {
     if [[ "$arg_no_cache_write" == 1 ]]; then
         verbose_log "[spoon] cache writing is disabled"

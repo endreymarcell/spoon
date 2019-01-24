@@ -1,7 +1,14 @@
+#!/usr/bin/env bash
+
+declare arg_preprod
+declare arg_prod
+declare arg_first
+declare identifier
+
 spoon_filter_for_environment() {
     if [[ $arg_preprod = 1 ]]; then
         nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp")))')
-        verbose_log "[spoon] nodes after filtering for preprod:\n${nodes}"
+        verbose_log "[spoon] nodes after filtering for preprod:\\n${nodes}"
         node_count=$(echo "${nodes}" | jq '. | length')
         if [[ "${node_count}" -eq 0 ]]; then
             echo "No instances found for identifier '${identifier}' after filtering for preprod."
@@ -9,7 +16,7 @@ spoon_filter_for_environment() {
         fi
     elif [[ $arg_prod = 1 ]]; then
         nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp") | not))')
-        verbose_log "[spoon] nodes after filtering for prod:\n${nodes}"
+        verbose_log "[spoon] nodes after filtering for prod:\\n${nodes}"
         node_count=$(echo "${nodes}" | jq '. | length')
         if [[ "${node_count}" -eq 0 ]]; then
             echo "No instances found for identifier '${identifier}' after filtering for prod."

@@ -1,3 +1,9 @@
+#!/usr/bin/env bash
+
+declare arg_no_cache_read
+declare arg_verybose
+declare identifier
+
 spoon_get_instances() {
     verbose_log "[spoon] getting instances"
     if [[ "$arg_no_cache_read" == 1 ]]; then
@@ -25,9 +31,9 @@ is_identifier_instance_id() {
 
 get_instances_from_cache() {
     if is_identifier_instance_id; then
-        nodes=$(jq "map(select(.id == \"${identifier}\"))" $CACHE_FILE_PATH)
+        nodes=$(jq "map(select(.id == \"${identifier}\"))" "$CACHE_FILE_PATH")
     else
-        nodes=$(jq "map(select(.service | test(\".*${identifier}.*\")))" $CACHE_FILE_PATH)
+        nodes=$(jq "map(select(.service | test(\".*${identifier}.*\")))" "$CACHE_FILE_PATH")
     fi
 
     nodes="$(echo "${nodes}" | jq 'sort_by(.service)')"
