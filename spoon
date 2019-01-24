@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
-source lib/utils.bash
-source lib/usage.bash
-source lib/args.bash
-source lib/query.bash
-source lib/filter.bash
-source lib/select.bash
-source lib/ssh.bash
-source lib/cache.bash
+source lib/0-utils.bash
+source lib/1-usage.bash
+source lib/2-query.bash
+source lib/3-filter.bash
+source lib/4-select.bash
+source lib/5-ssh.bash
+source lib/6-cache.bash
 
 
 spoon_args=( "${@}" )
