@@ -5,6 +5,7 @@ declare arg_verbose
 declare arg_verybose
 declare arg_dry_run
 declare arg_docker
+declare CONFIG_FILE_PATH
 
 spoon_ssh() {
     node_count=$(echo "${nodes}" | jq '. | length')
@@ -50,8 +51,13 @@ ssh_multiple_vpc() {
     check_cssh_availability
     
     vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
-    verbose_log "[spoon] VPC ID: ${vpc}" 
+    verbose_log "[spoon] VPC ID: ${vpc}"
     if ! vpc_config="$(get_config ".vpcJumphosts[\"$vpc\"]")"; then
+        echo "[spoon] Error while reading $CONFIG_FILE_PATH"
+        exit 1
+    fi
+    if [[ "$vpc_config" = "null" ]]; then
+        echo "[spoon] Error: ${vpc} is not listed in $CONFIG_FILE_PATH"
         exit 1
     fi
     [[ $arg_verybose = 1 ]] && echo "[spoon] VPC jumphost config:" && echo "$vpc_config"
@@ -116,6 +122,10 @@ ssh_single_vpc() {
     vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
     verbose_log "[spoon] VPC: ${vpc}" 
     if ! vpc_config="$(get_config ".vpcJumphosts[\"$vpc\"]")"; then
+        exit 1
+    fi
+    if [[ "$vpc_config" = "null" ]]; then
+        echo "[spoon] Error: ${vpc} is not listed in $CONFIG_FILE_PATH"
         exit 1
     fi
     [[ $arg_verybose = 1 ]] && echo "[spoon] VPC jumphost config:" && echo "$vpc_config"

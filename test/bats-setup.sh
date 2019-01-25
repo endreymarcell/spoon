@@ -6,6 +6,15 @@ source "$BATS_TEST_DIRNAME/lib/bats-assert/load.bash"
 source "$BATS_TEST_DIRNAME/lib/bats-mock/src/bats-mock.bash"
 source "$BATS_TEST_DIRNAME/lib/bats-utils.bash"
 
+# utils
+source "$BATS_TEST_DIRNAME/../lib/0-utils.bash"
+CONFIG_FILE_DIR="$(dirname $CONFIG_FILE_PATH)"
+set_config_to() {
+	value="$*"
+	[[ ! -d "$CONFIG_FILE_DIR" ]] && mkdir -p "$CONFIG_FILE_DIR"
+	echo "$value" > "$CONFIG_FILE_PATH"
+}
+
 # setup test environment
 setup() {
 	export mock_aws_path="$(mock_create)"
@@ -18,7 +27,7 @@ setup() {
 
 	spoon="$BATS_TEST_DIRNAME/../spoon"
 
-	rm -f ~/.cache/spoon_aws_cache.json{,.tmp}
+	rm -rf $CACHE_FILE_PATH{,.tmp} $CONFIG_FILE_DIR
 }
 
 # overwrite executables with mocks

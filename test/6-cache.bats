@@ -1,8 +1,9 @@
 #!/usr/bin/env bats
 
 source "$BATS_TEST_DIRNAME/bats-setup.sh"
+source "$BATS_TEST_DIRNAME/../lib/0-utils.bash"
 
-cache=~/.cache/spoon_aws_cache.json
+cache=$CACHE_FILE_PATH
 
 @test "If there is no cache file, spoon queries aws." {
 	run $spoon foo

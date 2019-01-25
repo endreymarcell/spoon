@@ -1,0 +1,10 @@
+[
+    {
+        "id": "i-abcd1234",
+        "publicIp": "1.1.1.1",
+        "privateIp": "192.168.100.1",
+        "vpc": "vpc-1",
+        "service": "fooservice",
+        "state": "running"
+    }
+]

@@ -49,13 +49,19 @@ is_cache_valid() {
 get_config() {
     jq_expression="$1"
     if [[ ! -f "$CONFIG_FILE_PATH" ]]; then
+        CONFIG_FILE_DIR="$(dirname $CONFIG_FILE_PATH)"
+        [[ ! -d "$CONFIG_FILE_DIR" ]] && mkdir -p "$CONFIG_FILE_DIR"
         echo '{}' > $CONFIG_FILE_PATH
     fi
-    if ! jq . "$CONFIG_FILE_PATH" >/dev/null; then
+    if ! jq . "$CONFIG_FILE_PATH" >/dev/null 2>&1; then
         echo "[spoon] Error: $CONFIG_FILE_PATH is not valid JSON" 1>&2
         exit 1
     fi
-    jq "$jq_expression" "$CONFIG_FILE_PATH"
+    if ! result="$(jq "$jq_expression" "$CONFIG_FILE_PATH" 2>&1)"; then
+        echo "[spoon] Error while executing jq '${jq_expression}' $CONFIG_FILE_PATH" 1>&2
+        exit 1
+    fi
+    echo "$result"
 }
 
 jqrangify() {
