@@ -88,7 +88,7 @@ ssh_multiple_vpc() {
         verbose_log "[spoon] calling csshx"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
-        csshx --ssh_args "-J $jumphosts -l root" $ips
+        csshx --ssh_args "-J $jumphosts -o StrictHostKeyChecking=no -l root" $ips
     fi
 }
 
@@ -109,7 +109,7 @@ ssh_multiple_non_vpc() {
         verbose_log "[spoon] calling csshx"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
-        csshx --login root $ips
+        csshx --login root --ssh_args "-o StrictHostKeyChecking=no" $ips
     fi
 }
 
