@@ -151,6 +151,8 @@ ssh_single_vpc() {
     if [[ "${arg_docker}" = 1 ]]; then
         ssh -o StrictHostKeyChecking=no -J "$jumphosts" -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
     else
+        # the linter thinks "ip" is a command for the server. it is not.
+        # shellcheck disable=SC2029
         ssh -o StrictHostKeyChecking=no -J "$jumphosts" -l root "${ip}"
     fi
 }
@@ -167,6 +169,8 @@ ssh_single_non_vpc() {
     if [[ "${arg_docker}" = 1 ]]; then
         ssh -o StrictHostKeyChecking=no -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
     else
+        # the linter thinks "ip" is a command for the server. it is not.
+        # shellcheck disable=SC2029
         ssh -o StrictHostKeyChecking=no -l root "${ip}"
     fi
 }
