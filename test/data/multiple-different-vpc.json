@@ -17,9 +17,9 @@
     },
     {
         "id": "i-abcd3456",
-        "publicIp": "3.3.3.3",
-        "privateIp": null,
-        "vpc": null,
+        "publicIp": null,
+        "privateIp": "3.3.3.3",
+        "vpc": "other-vpc",
         "service": "fooservice-prod",
         "state": "running"
     }

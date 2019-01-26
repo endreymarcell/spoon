@@ -10,9 +10,15 @@ declare CONFIG_FILE_PATH
 spoon_ssh() {
     node_count=$(echo "${nodes}" | jq '. | length')
     verbose_log "[spoon] number of instances: ${node_count}"
-    if ! is_vpc=$(check_vpc); then
+    if ! is_vpc=$(check_all_or_none_vpc); then
         echo Cannot mix VPC and non-VPC nodes.
         exit 1
+    fi
+    if [[ "$is_vpc" = 1 ]]; then
+        if ! check_uniform_vpc; then
+            echo All nodes must be in the same VPC.
+            exit 1
+        fi
     fi
     if [[ "${node_count}" -gt 1 ]]; then
         if [[ $is_vpc = 1 ]]; then
@@ -29,7 +35,7 @@ spoon_ssh() {
     fi
 }
 
-check_vpc() {
+check_all_or_none_vpc() {
     vpc_node_count=$(echo "${nodes}" | jq 'map(select(.vpc)) | length')
     non_vpc_node_count=$(echo "${nodes}" | jq 'map(select(.vpc == null)) | length')
     if [[ "$node_count" = "$vpc_node_count" ]]; then
@@ -37,6 +43,13 @@ check_vpc() {
     elif [[ "$node_count" = "$non_vpc_node_count" ]]; then
         echo 0
     else
+        return 1
+    fi
+}
+
+check_uniform_vpc() {
+    num_unique_vpc_ids="$(echo "${nodes}" | jq '.[] | .vpc' | sort | uniq | wc -l | xargs)"
+    if [[ "$num_unique_vpc_ids" -gt 1 ]]; then
         return 1
     fi
 }

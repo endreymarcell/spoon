@@ -3,7 +3,7 @@
         "id": "i-abcd1234",
         "publicIp": null,
         "privateIp": "1.1.1.1",
-        "vpc": "example-vpc",
+        "vpc": "vpc-1",
         "service": "fooservice-prod",
         "state": "running"
     },
@@ -11,7 +11,7 @@
         "id": "i-abcd2345",
         "publicIp": null,
         "privateIp": "2.2.2.2",
-        "vpc": "example-vpc",
+        "vpc": "vpc-1",
         "service": "fooservice-prod",
         "state": "running"
     },
@@ -19,7 +19,7 @@
         "id": "i-abcd3456",
         "publicIp": null,
         "privateIp": "3.3.3.3",
-        "vpc": "example-vpc",
+        "vpc": "vpc-1",
         "service": "fooservice-prod",
         "state": "running"
     }
