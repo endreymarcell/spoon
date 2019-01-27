@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 declare arg_no_cache_read
+declare arg_no_cache_write
 declare identifier
 
 spoon_get_instances() {
