@@ -9,12 +9,12 @@ spoon_ssh() {
     node_count=$(echo "${nodes}" | jq '. | length')
     verbose_log "number of instances: ${node_count}"
     if ! is_vpc=$(check_all_or_none_vpc); then
-        echo Cannot mix VPC and non-VPC nodes.
+        spoon_log Cannot mix VPC and non-VPC nodes.
         exit 1
     fi
     if [[ "$is_vpc" = 1 ]]; then
-        if ! check_uniform_vpc; then
-            echo All nodes must be in the same VPC.
+        if ! check_same_vpc; then
+            spoon_log All nodes must be in the same VPC.
             exit 1
         fi
     fi
@@ -45,7 +45,7 @@ check_all_or_none_vpc() {
     fi
 }
 
-check_uniform_vpc() {
+check_same_vpc() {
     num_unique_vpc_ids="$(echo "${nodes}" | jq '.[] | .vpc' | sort | uniq | wc -l | xargs)"
     if [[ "$num_unique_vpc_ids" -gt 1 ]]; then
         return 1
@@ -79,7 +79,7 @@ ssh_multiple_vpc() {
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
         i2cssh -XJ="$jumphosts" -Xl=root $ips
-        echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
+        spoon_log hint: press Cmd+Shift+I to send your keyboard input to all the instances
     else
         [[ "${arg_dry_run}" = 1 ]] && spoon_log "dry run, not calling csshx" && return
         verbose_log "calling csshx"
@@ -99,15 +99,15 @@ ssh_multiple_non_vpc() {
         verbose_log "calling i2cssh"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
-        i2cssh --login root $ips
-        echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
+        i2cssh -Xl=root $ips
+        spoon_log hint: press Cmd+Shift+I to send your keyboard input to all the instances
         # passing -o options (StrictHostKeyChecking) to i2cssh is currently not supported
         # see https://github.com/wouterdebie/i2cssh/issues/89 and https://github.com/wouterdebie/i2cssh/issues/79
     else
         verbose_log "calling csshx"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
-        csshx --login root --ssh_args "-o StrictHostKeyChecking=no" $ips
+        csshx --ssh_args "-o StrictHostKeyChecking=no -l root" $ips
     fi
 }
 
@@ -115,12 +115,12 @@ check_cssh_availability() {
     verbose_log "TERM_PROGRAM is ${TERM_PROGRAM}"
     if [[ "${TERM_PROGRAM}" == iTerm.app ]]; then
         if ! command -v i2cssh >/dev/null; then
-            echo Please install i2cssh to SSH to multiple instances.
+            spoon_log "please install i2cssh to SSH to multiple instances (https://github.com/wouterdebie/i2cssh)"
             exit 1
         fi
     else
         if ! command -v csshx >/dev/null; then
-            echo Please install csshX to SSH to multiple instances.
+            spoon_log "please install csshX to SSH to multiple instances (https://github.com/brockgr/csshx)"
             exit 1
         fi
     fi

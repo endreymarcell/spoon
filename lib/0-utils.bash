@@ -49,11 +49,7 @@ is_cache_present() {
 }
 
 is_cache_fresh() {
-    if [[ "$(find "$CACHE_FILE_PATH" -mmin -$((60*CACHE_EXPIRY_HOURS)) -print0 2>/dev/null | xargs -0)" != "" ]]; then
-        return 0
-    else
-        return 1
-    fi
+    find "$CACHE_FILE_PATH" -mmin -$((60*CACHE_EXPIRY_HOURS)) | grep -q .
 }
 
 is_cache_valid() {

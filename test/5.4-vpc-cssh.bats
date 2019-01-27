@@ -8,7 +8,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -a foo
 
     assert_failure
-    assert_output --partial "Cannot mix VPC and non-VPC nodes."
+    assert_output --partial "[spoon] Cannot mix VPC and non-VPC nodes."
 }
 
 @test "If not all nodes are in the same VPC, spoon exits." {
@@ -17,7 +17,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -a foo
 
     assert_failure
-    assert_output "All nodes must be in the same VPC."
+    assert_output "[spoon] All nodes must be in the same VPC."
 }
 
 @test "Spoon passes the correct jumphost param to csshx (single jumphost)." {

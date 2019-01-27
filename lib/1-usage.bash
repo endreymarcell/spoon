@@ -3,7 +3,6 @@
 declare spoon_args
 declare identifier
 
-
 spoon_usage_and_help() {
     if has_short_flag h "${spoon_args[@]}" || has_long_flag help "${spoon_args[@]}"; then
         print_help
@@ -12,22 +11,24 @@ spoon_usage_and_help() {
 }
 
 print_help() {
-    echo "usage: spoon [flags] [identifier]"
-    echo flags:
-    echo "  -h, --help             display this message and exit"
-    echo "  -i, --interactive      fuzzy search on all instances (requires peco)"
-    echo "  -p, --preprod          preprod instances only"
-    echo "  -P, --prod             production instances only"
-    echo "  -1, --first            if there are multiple matching instances, select the first one without a prompt"
-    echo "  -a, --all              if there are multiple matching instances, select all of them without a prompt"
-    echo "  -n, --dry-run          list instances, but don't call ssh"
-    echo "  -d, --docker           enter the docker container of the application"
-    echo "  -r, --refresh          refresh the cache, even if it's up-to-date"
-    echo "  -w, --no-cache-write   don't write the cache file"
-    echo "  -v, --verbose          debug logging"
-    echo identifier:
-    echo "  Instance-id (must start with i-) or service name."
-    echo "  If left empty, interactive mode is assumed."
+    cat <<EOF
+usage: spoon [flags] [identifier]
+flags:
+  -h, --help             display this message and exit
+  -i, --interactive      fuzzy search on all instances (requires peco)
+  -p, --preprod          preprod instances only
+  -P, --prod             production instances only
+  -1, --first            if there are multiple matching instances, select the first one without a prompt
+  -a, --all              if there are multiple matching instances, select all of them without a prompt
+  -n, --dry-run          list instances, but don't call ssh
+  -d, --docker           enter the docker container of the application
+  -r, --refresh          refresh the cache, even if it's up-to-date
+  -w, --no-cache-write   don't write the cache file
+  -v, --verbose          debug logging
+identifier:
+  Instance-id (must start with i-) or service name.
+  If left empty, interactive mode is assumed.
+EOF
 }
 
 spoon_set_args() {

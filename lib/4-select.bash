@@ -51,6 +51,6 @@ select_indices_with_selector() {
     verbose_log "selecting nodes with the built-in prompt"
     echo "${nodes_data}"| nl '-s) ' | column -t
     echo "*)  all"
-    echo "ranges are also allowed, eg. 1, 3, 5-8"
+    echo "(ranges are also allowed, eg. 1, 3, 5-8)"
     read -rp '==> ' selected_indices
 }

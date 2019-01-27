@@ -11,7 +11,7 @@ spoon_filter_for_environment() {
         verbose_log "nodes after filtering for preprod:\\n${nodes}"
         node_count=$(echo "${nodes}" | jq '. | length')
         if [[ "${node_count}" -eq 0 ]]; then
-            echo "No instances found for identifier '${identifier}' after filtering for preprod."
+            spoon_log "No instances found for identifier '${identifier}' after filtering for preprod."
             exit 1
         fi
     elif [[ $arg_prod = 1 ]]; then
@@ -19,7 +19,7 @@ spoon_filter_for_environment() {
         verbose_log "nodes after filtering for prod:\\n${nodes}"
         node_count=$(echo "${nodes}" | jq '. | length')
         if [[ "${node_count}" -eq 0 ]]; then
-            echo "No instances found for identifier '${identifier}' after filtering for prod."
+            spoon_log "No instances found for identifier '${identifier}' after filtering for prod."
             exit 1
         fi
     fi

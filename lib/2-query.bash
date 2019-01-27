@@ -24,11 +24,7 @@ spoon_get_instances() {
 }
 
 is_identifier_instance_id() {
-    if [[ "${identifier:0:2}" = i- ]]; then
-        return 0
-    else
-        return 1
-    fi
+    test "${identifier:0:2}" = i-
 }
 
 get_instances_from_cache() {
@@ -66,7 +62,7 @@ get_instances_from_aws() {
 
     node_count=$(echo "${nodes}" | jq '. | length')
     if [[ "${node_count}" -eq 0 ]]; then
-        echo "No instances returned from AWS for identifier '${identifier}'."
+        spoon_log "No instances returned from AWS for identifier '${identifier}'."
         exit 1
     fi
 }
@@ -86,6 +82,7 @@ query_aws() {
 }
 
 query_aws_by_name() {
+    verbose_log "query aws by service name"
     query_aws --filters "Name=tag:Name,Values=*$1*"
 }
 

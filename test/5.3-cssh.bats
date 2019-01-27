@@ -9,7 +9,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon foo <<< '*'
 
     assert_failure
-    assert_line "Please install csshX to SSH to multiple instances."
+    assert_line "[spoon] please install csshX to SSH to multiple instances (https://github.com/brockgr/csshx)"
     assert_equal $(mock_get_call_num $mock_csshx_path) 0
 }
 
@@ -20,7 +20,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     TERM_PROGRAM=iTerm.app run $spoon foo <<< '*'
 
     assert_failure
-    assert_line "Please install i2cssh to SSH to multiple instances."
+    assert_line "[spoon] please install i2cssh to SSH to multiple instances (https://github.com/wouterdebie/i2cssh)"
     assert_equal $(mock_get_call_num $mock_i2cssh_path) 0
 }
 

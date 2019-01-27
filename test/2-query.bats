@@ -32,7 +32,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon foo
 
     assert_failure
-    assert_output "No instances returned from AWS for identifier 'foo'."
+    assert_output "[spoon] No instances returned from AWS for identifier 'foo'."
 }
 
 @test "If one instance is returned, spoon should attempt to ssh to it." {

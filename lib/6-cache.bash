@@ -11,7 +11,7 @@ spoon_build_cache() {
     elif is_cache_present && is_cache_fresh && is_cache_valid && [[ "$arg_no_cache_read" == 0 ]]; then
         verbose_log "cache is up-to-date and refresh was not requested, no further action needed"
     elif find "${CACHE_FILE_PATH}.tmp" >/dev/null 2>&1; then
-        verbose_log "cache is already being built"
+        verbose_log "cache is already being built, see ${CACHE_FILE_PATH}.tmp"
     else
         verbose_log "building cache in the background..."
         cache_nodes_from_aws &
