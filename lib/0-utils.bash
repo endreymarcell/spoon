@@ -2,8 +2,9 @@
 
 declare arg_verbose
 
-CONFIG_FILE_PATH=~/.spoon/config.json
-CACHE_FILE_PATH=~/.cache/spoon_aws_cache.json
+SPOON_HOME_DIR=~/.spoon
+CONFIG_FILE_PATH="${SPOON_HOME_DIR}/config.json"
+CACHE_FILE_PATH="${SPOON_HOME_DIR}/cache.json"
 CACHE_EXPIRY_HOURS=24
 
 verbose_log() {
@@ -34,6 +35,10 @@ has_long_flag() {
     return 1
 }
 
+is_cache_present() {
+    find "$CACHE_FILE_PATH" >/dev/null 2>&1
+}
+
 is_cache_fresh() {
     if [[ "$(find "$CACHE_FILE_PATH" -mmin -$((60*CACHE_EXPIRY_HOURS)) -print0 2>/dev/null | xargs -0)" != "" ]]; then
         return 0
@@ -48,11 +53,8 @@ is_cache_valid() {
 
 get_config() {
     jq_expression="$1"
-    if [[ ! -f "$CONFIG_FILE_PATH" ]]; then
-        CONFIG_FILE_DIR="$(dirname $CONFIG_FILE_PATH)"
-        [[ ! -d "$CONFIG_FILE_DIR" ]] && mkdir -p "$CONFIG_FILE_DIR"
-        echo '{}' > $CONFIG_FILE_PATH
-    fi
+    [[ ! -d "$SPOON_HOME_DIR" ]] && mkdir -p "$SPOON_HOME_DIR"
+    [[ ! -f "$CONFIG_FILE_PATH" ]] && echo '{}' > "$CONFIG_FILE_PATH"
     if ! jq . "$CONFIG_FILE_PATH" >/dev/null 2>&1; then
         echo "[spoon] Error: $CONFIG_FILE_PATH is not valid JSON" 1>&2
         exit 1

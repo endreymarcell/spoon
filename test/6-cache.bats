@@ -12,6 +12,7 @@ cache=$CACHE_FILE_PATH
 }
 
 @test "If there is an outdated cache file, spoon queries aws." {
+	set_cache_to '[]'
 	touch -d "25 hours ago" $cache
 
 	run $spoon foo
@@ -20,7 +21,7 @@ cache=$CACHE_FILE_PATH
 }
 
 @test "If there is a recent cache file, spoon does not query aws." {
-	echo '[]' > $cache
+	set_cache_to '[]'
 
 	run $spoon foo
 
@@ -28,7 +29,7 @@ cache=$CACHE_FILE_PATH
 }
 
 @test "If there is an invalid cache file, spoon queries aws." {
-	echo invalid data > $cache
+	set_cache_to invalid data
 
 	run $spoon foo
 
@@ -36,7 +37,7 @@ cache=$CACHE_FILE_PATH
 }
 
 @test "If there is a recent cache file but cache reading is disabled, spoon queries aws." {
-	echo '[]' > $cache
+	set_cache_to '[]'
 
 	run -r $spoon foo
 
@@ -44,7 +45,7 @@ cache=$CACHE_FILE_PATH
 }
 
 @test "spoon can find a single instance in the cache based on their service name." {
-	cp $BATS_TEST_DIRNAME/data/single.json $cache
+	set_cache_to "$(cat $BATS_TEST_DIRNAME/data/single.json)"
 
 	run $spoon fooservice
 
@@ -53,7 +54,7 @@ cache=$CACHE_FILE_PATH
 }
 
 @test "spoon can find multiple instances in the cache based on their service name." {
-	cp $BATS_TEST_DIRNAME/data/multiple.json $cache
+	set_cache_to "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
 
 	run $spoon fooservice <<< '*'
 
@@ -62,7 +63,7 @@ cache=$CACHE_FILE_PATH
 }
 
 @test "spoon can find a single instance in the cache based on their instance-id." {
-	cp $BATS_TEST_DIRNAME/data/multiple.json $cache
+	set_cache_to "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
 
 	run $spoon -i i-abcd2345
 
@@ -82,6 +83,7 @@ cache=$CACHE_FILE_PATH
 @test "If there is an outdated cache file, spoon builds a new one after running." {
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/single.json)" 1
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)" 2
+	set_cache_to '[]'
 	touch -d "25 hours ago" $cache
 
 	run $spoon foo
@@ -91,17 +93,17 @@ cache=$CACHE_FILE_PATH
 
 @test "If there is a recent cache file, spoon does not build one after running." {
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/single.json)"
-	touch $cache
+	set_cache_to '[]'
 
 	run $spoon foo
 
-	assert_equal "$(cat $cache)" ""
+	assert_equal "$(cat $cache)" "[]"
 }
 
 @test "If there is a recent cache file but refresh is requested, spoon does build one after running." {
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/single.json)" 1
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)" 2
-	touch $cache
+	set_cache_to '[]'
 
 	run $spoon -r foo
 
@@ -118,6 +120,7 @@ cache=$CACHE_FILE_PATH
 
 @test "If there is no cache file but cache writing is already in progress, spoon does not build one after running." {
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/single.json)"
+	[[ ! -d "$SPOON_HOME_DIR" ]] && mkdir -p "$SPOON_HOME_DIR"
 	touch "${cache}.tmp"
 
 	run $spoon foo

@@ -4,17 +4,17 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
 
 source "$BATS_TEST_DIRNAME/../lib/0-utils.bash"
 
-@test "If there's no $CONFIG_FILE_DIR directory, get_config creates it." {
-    rm -rf $CONFIG_FILE_DIR
+@test "If there's no $SPOON_HOME_DIR directory, get_config creates it." {
+    rm -rf $SPOON_HOME_DIR
     
     get_config
 
-    assert test -d $CONFIG_FILE_DIR
+    assert test -d $SPOON_HOME_DIR
 }
 
 @test "If there's no $CONFIG_FILE_PATH file, get_config creates a valid JSON file." {
-    rm -rf $CONFIG_FILE_DIR
-    mkdir $CONFIG_FILE_DIR
+    rm -rf $SPOON_HOME_DIR
+    mkdir $SPOON_HOME_DIR
     
     get_config
 

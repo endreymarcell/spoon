@@ -9,6 +9,9 @@ spoon_get_instances() {
     if [[ "$arg_no_cache_read" == 1 ]]; then
         verbose_log "[spoon] cache reading is disabled, querying aws"
         get_instances_from_aws
+    elif ! is_cache_present; then
+        verbose_log "[spoon] cache is not found at ${CACHE_FILE_PATH}, querying aws"
+        get_instances_from_aws
     elif ! is_cache_fresh; then
         verbose_log "[spoon] cache at ${CACHE_FILE_PATH} is outdated, querying aws"
         get_instances_from_aws

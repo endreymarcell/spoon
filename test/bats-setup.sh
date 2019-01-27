@@ -8,12 +8,19 @@ source "$BATS_TEST_DIRNAME/lib/bats-utils.bash"
 
 # utils
 source "$BATS_TEST_DIRNAME/../lib/0-utils.bash"
-CONFIG_FILE_DIR="$(dirname $CONFIG_FILE_PATH)"
 set_config_to() {
 	value="$*"
-	[[ ! -d "$CONFIG_FILE_DIR" ]] && mkdir -p "$CONFIG_FILE_DIR"
+	[[ ! -d "$SPOON_HOME_DIR" ]] && mkdir -p "$SPOON_HOME_DIR"
 	echo "$value" > "$CONFIG_FILE_PATH"
 }
+set_cache_to() {
+	value="$*"
+	[[ ! -d "$SPOON_HOME_DIR" ]] && mkdir -p "$SPOON_HOME_DIR"
+	echo "$value" > "$CACHE_FILE_PATH"
+}
+# set_file_to() {
+
+# }
 
 # setup test environment
 setup() {
@@ -27,7 +34,7 @@ setup() {
 
 	spoon="$BATS_TEST_DIRNAME/../spoon"
 
-	rm -rf $CACHE_FILE_PATH{,.tmp} $CONFIG_FILE_DIR
+	rm -rf $SPOON_HOME_DIR
 }
 
 # overwrite executables with mocks
