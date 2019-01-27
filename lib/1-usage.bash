@@ -17,28 +17,28 @@ spoon_usage_and_help() {
 }
 
 print_help() {
-    echo "usage: spoon [flags] <identifier>"
+    echo "usage: spoon [flags] [identifier]"
     echo flags:
-    echo "-h, --help             display this message and exit"
-    echo "-p, --preprod          preprod instances only"
-    echo "-P, --prod             production instances only"
-    echo "-1, --first            if there are multiple matching instances, select the first one without a prompt"
-    echo "-a, --all              if there are multiple matching instances, select all of them without a prompt"
-    echo "-n, --dry-run          list instances, but don't call ssh"
-    echo "-d, --docker           enter the docker container of the application"
-    echo "-r, --refresh          refresh the cache, even if it's up-to-date"
-    echo "-w, --no-cache-write   don't write the cache file"
-    echo "-v, --verbose          debug logging"
+    echo "  -h, --help             display this message and exit"
+    echo "  -i, --interactive      fuzzy search on all instances (requires peco)"
+    echo "  -p, --preprod          preprod instances only"
+    echo "  -P, --prod             production instances only"
+    echo "  -1, --first            if there are multiple matching instances, select the first one without a prompt"
+    echo "  -a, --all              if there are multiple matching instances, select all of them without a prompt"
+    echo "  -n, --dry-run          list instances, but don't call ssh"
+    echo "  -d, --docker           enter the docker container of the application"
+    echo "  -r, --refresh          refresh the cache, even if it's up-to-date"
+    echo "  -w, --no-cache-write   don't write the cache file"
+    echo "  -v, --verbose          debug logging"
+    echo identifier:
+    echo "  Instance-id (must start with i-) or service name."
+    echo "  If left empty, interactive mode is assumed."
 }
 
 spoon_set_args() {
     identifier="${spoon_args[-1]}"
 
-    if [[ "${identifier}" =~ ^- ]]; then
-        echo identifier must not be empty
-        exit 1
-    fi
-
+    if has_short_flag i "${spoon_args[@]}" || has_long_flag interactive "${spoon_args[@]}"; then arg_interactive=1; else arg_interactive=0; fi
     if has_short_flag p "${spoon_args[@]}" || has_long_flag preprod "${spoon_args[@]}"; then arg_preprod=1; else arg_preprod=0; fi
     if has_short_flag P "${spoon_args[@]}" || has_long_flag prod "${spoon_args[@]}"; then arg_prod=1; else arg_prod=0; fi
     if has_short_flag 1 "${spoon_args[@]}" || has_long_flag first "${spoon_args[@]}"; then arg_first=1; else arg_first=0; fi
@@ -50,6 +50,12 @@ spoon_set_args() {
     if has_short_flag v "${spoon_args[@]}" || has_long_flag verbose "${spoon_args[@]}"; then arg_verbose=1; else arg_verbose=0; fi
     # shellcheck disable=SC2034
     if has_short_flag V "${spoon_args[@]}"; then arg_verbose=1 && arg_verybose=1; else arg_verybose=0; fi
+
+    if [[ "${identifier}" =~ ^- ]]; then
+        [[ ${arg_verybose} = 1 ]] && echo "[spoon] empty identifier, setting mode to interactive"
+        identifier=""
+        arg_interactive=1
+    fi
 }
 
 spoon_check_args() {
@@ -66,6 +72,7 @@ spoon_check_args() {
 spoon_verybose_print_args() {
     if [[ "${arg_verybose}" = 1 ]]; then
         echo "[spoon] identifier=${identifier}"
+        echo "[spoon] arg_interactive=${arg_interactive}"
         echo "[spoon] arg_preprod=${arg_preprod}"
         echo "[spoon] arg_prod=${arg_prod}"
         echo "[spoon] arg_first=${arg_first}"
