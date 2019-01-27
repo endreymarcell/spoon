@@ -101,3 +101,33 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     assert_equal $(mock_get_call_num $mock_csshx_path) 1
     assert_equal_regex "$(mock_get_call_args $mock_csshx_path)" "2.2.2.2 4.4.4.4 5.5.5.5 6.6.6.6 8.8.8.8"
 }
+
+@test "Interactive mode: if peco is not installed, spoon exits." {
+    mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
+    mock_set_status $mock_command_path 1
+
+    run $spoon -i foo
+
+    assert_failure
+    assert_output '[spoon] please install peco to use interactive mode (https://github.com/peco/peco)'
+}
+
+@test "Interactive mode: if peco is installed, spoon calls it." {
+    mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
+    mock_set_status $mock_command_path 0
+
+    run $spoon -i foo
+
+    assert_success
+    assert_equal $(mock_get_call_num $mock_command_path) 1
+}
+
+@test "If no argument is passed to spoon, interactive mode is assumed." {
+    mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
+    mock_set_status $mock_command_path 0
+
+    run $spoon
+
+    assert_success
+    assert_equal $(mock_get_call_num $mock_command_path) 1
+}

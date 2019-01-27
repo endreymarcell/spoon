@@ -18,9 +18,6 @@ set_cache_to() {
 	[[ ! -d "$SPOON_HOME_DIR" ]] && mkdir -p "$SPOON_HOME_DIR"
 	echo "$value" > "$CACHE_FILE_PATH"
 }
-# set_file_to() {
-
-# }
 
 # setup test environment
 setup() {
@@ -28,9 +25,10 @@ setup() {
 	export mock_ssh_path="$(mock_create)"
 	export mock_csshx_path="$(mock_create)"
 	export mock_i2cssh_path="$(mock_create)"
+	export mock_peco_path="$(mock_create)"
 	export mock_command_path="$(mock_create)"
 
-	export -f aws ssh csshx i2cssh command
+	export -f aws ssh csshx i2cssh peco command
 
 	spoon="$BATS_TEST_DIRNAME/../spoon"
 
@@ -52,6 +50,10 @@ csshx() {
 
 i2cssh() {
 	bash "${mock_i2cssh_path}" "${@}"
+}
+
+peco() {
+	bash "${mock_peco_path}" "${@}"
 }
 
 command() {
