@@ -5,7 +5,7 @@ declare arg_interactive
 
 spoon_select_from_multiple() {
     if [[ $arg_all = 0 ]] && [[ $node_count -gt 1 ]]; then
-        nodes_data="$(echo "${nodes}" | jq '.[] | .id + " " + .service + " " + (if .publicIp then .publicIp else ("*" + .privateIp) end) + " (" + .state + ")"' | tr -d '\"')"
+        nodes_data="$(echo "${nodes}" | jq '.[] | .id + " " + .service + " " + (if .publicIp then .publicIp else ("*" + .privateIp) end) + " " + (if .vpc then .vpc else "-" end) + " (" + .state + ")"' | tr -d '\"')"
         if [[ "$arg_interactive" = 1 ]]; then
             select_indices_with_peco
         else
