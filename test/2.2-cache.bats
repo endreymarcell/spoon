@@ -8,7 +8,7 @@ cache=$CACHE_FILE_PATH
 @test "If there is no cache file, spoon queries aws." {
 	run $spoon foo
 
-	assert_equal $(mock_get_call_num $mock_aws_path) 1
+	assert_equal $(mock_get_call_num $mock_aws_path) 2
 }
 
 @test "If there is an outdated cache file, spoon queries aws." {
@@ -17,7 +17,7 @@ cache=$CACHE_FILE_PATH
 
 	run $spoon foo
 
-	assert_equal $(mock_get_call_num $mock_aws_path) 1
+	assert_equal $(mock_get_call_num $mock_aws_path) 2
 }
 
 @test "If there is a recent cache file, spoon does not query aws." {
@@ -33,7 +33,7 @@ cache=$CACHE_FILE_PATH
 
 	run $spoon foo
 
-	assert_equal $(mock_get_call_num $mock_aws_path) 1
+	assert_equal $(mock_get_call_num $mock_aws_path) 2
 }
 
 @test "If there is a recent cache file but cache reading is disabled, spoon queries aws." {
@@ -107,7 +107,7 @@ cache=$CACHE_FILE_PATH
 
 	run $spoon -r foo
 
-	assert_equal "$(cat $cache | jq .)" "$(cat $BATS_TEST_DIRNAME/data/multiple.json | jq .)"
+	assert_equal "$(cat $cache)" "$(cat $BATS_TEST_DIRNAME/data/multiple.json | jq .)"
 }
 
 @test "If there is no cache file but cache writing is disabled, spoon does not build one after running." {
@@ -147,7 +147,6 @@ cache=$CACHE_FILE_PATH
 }
 
 @test "If there is no cache file, spoon builds one after running even if no instances were found." {
-	skip "implement 'finally' behavior"
 	mock_set_output $mock_aws_path "[]" 1
 	mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)" 2
 

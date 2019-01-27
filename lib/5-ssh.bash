@@ -74,14 +74,14 @@ ssh_multiple_vpc() {
     jumphosts="$(echo "$vpc_config" | jq 'map("root@" + .) | join(",")' | tr -d '"')"
     
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
-        [[ "${arg_dry_run}" = 1 ]] && spoon_log "dry run, not calling i2cssh" && return
+        [[ "${arg_dry_run}" = 1 ]] && spoon_log "dry run, not calling i2cssh" && exit 0
         verbose_log "calling i2cssh"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
         i2cssh -XJ="$jumphosts" -Xl=root $ips
         spoon_log hint: press Cmd+Shift+I to send your keyboard input to all the instances
     else
-        [[ "${arg_dry_run}" = 1 ]] && spoon_log "dry run, not calling csshx" && return
+        [[ "${arg_dry_run}" = 1 ]] && spoon_log "dry run, not calling csshx" && exit 0
         verbose_log "calling csshx"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
@@ -93,7 +93,7 @@ ssh_multiple_non_vpc() {
     verbose_log "None of the nodes are in VPC."
     ips=$(echo "${nodes}" | jq '.[].publicIp' | tr -d '"' | xargs)
     verbose_log "IP addresses:\\n${ips// /\\n}"
-    [[ "${arg_dry_run}" = 1 ]] && return
+    [[ "${arg_dry_run}" = 1 ]] && exit 0
     check_cssh_availability
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
         verbose_log "calling i2cssh"
@@ -143,7 +143,7 @@ ssh_single_vpc() {
     jumphosts="$(echo "$vpc_config" | jq 'map("root@" + .) | join(",")' | tr -d '"')"
     if [[ "${arg_dry_run}" = 1 ]]; then
         verbose_log "Dry run, not calling SSH."
-        return
+        exit 0
     fi
     verbose_log "calling ssh"
     if [[ "${arg_docker}" = 1 ]]; then
@@ -161,7 +161,7 @@ ssh_single_non_vpc() {
     verbose_log "IP address: ${ip}"
     if [[ "${arg_dry_run}" = 1 ]]; then
         verbose_log "Dry run, not calling SSH."
-        return
+        exit 0
     fi
     verbose_log "calling ssh"
     if [[ "${arg_docker}" = 1 ]]; then
