@@ -44,10 +44,10 @@ spoon_set_args() {
     if has_short_flag w "${spoon_args[@]}" || has_long_flag no-cache-write "${spoon_args[@]}"; then arg_no_cache_write=1; else arg_no_cache_write=0; fi
     if has_short_flag v "${spoon_args[@]}" || has_long_flag verbose "${spoon_args[@]}"; then arg_verbose=1; else arg_verbose=0; fi
     # shellcheck disable=SC2034
-    if has_short_flag V "${spoon_args[@]}"; then arg_verbose=1 && arg_verybose=1; else arg_verybose=0; fi
+    if has_short_flag V "${spoon_args[@]}"; then arg_verbose=1 && arg_very_verbose=1; else arg_very_verbose=0; fi
 
     if [[ "${#spoon_args[@]}" -lt 1 ]] || [[ "${identifier}" =~ ^- ]]; then
-        [[ ${arg_verybose} = 1 ]] && echo "[spoon] empty identifier, setting mode to interactive"
+        very_verbose_log "empty identifier, setting mode to interactive"
         identifier=""
         arg_interactive=1
     fi
@@ -65,15 +65,13 @@ spoon_check_args() {
 }
 
 spoon_verybose_print_args() {
-    if [[ "${arg_verybose}" = 1 ]]; then
-        echo "[spoon] identifier=${identifier}"
-        echo "[spoon] arg_interactive=${arg_interactive}"
-        echo "[spoon] arg_preprod=${arg_preprod}"
-        echo "[spoon] arg_prod=${arg_prod}"
-        echo "[spoon] arg_first=${arg_first}"
-        echo "[spoon] arg_dry_run=${arg_dry_run}"
-        echo "[spoon] arg_docker=${arg_docker}"
-        echo "[spoon] arg_no_cache_read=${arg_no_cache_read}"
-        echo "[spoon] arg_no_cache_write=${arg_no_cache_write}"
-    fi
+    very_verbose_log "identifier=${identifier}"
+    very_verbose_log "arg_interactive=${arg_interactive}"
+    very_verbose_log "arg_preprod=${arg_preprod}"
+    very_verbose_log "arg_prod=${arg_prod}"
+    very_verbose_log "arg_first=${arg_first}"
+    very_verbose_log "arg_dry_run=${arg_dry_run}"
+    very_verbose_log "arg_docker=${arg_docker}"
+    very_verbose_log "arg_no_cache_read=${arg_no_cache_read}"
+    very_verbose_log "arg_no_cache_write=${arg_no_cache_write}"
 }

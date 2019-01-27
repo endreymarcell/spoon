@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
 
 declare arg_verbose
+declare arg_very_verbose
 
 SPOON_HOME_DIR=~/.spoon
 CONFIG_FILE_PATH="${SPOON_HOME_DIR}/config.json"
 CACHE_FILE_PATH="${SPOON_HOME_DIR}/cache.json"
 CACHE_EXPIRY_HOURS=24
 
+spoon_log() {
+    echo -e "[spoon] ${*}"
+}
+
 verbose_log() {
-    [[ "${arg_verbose}" = 1 ]] && echo -e "${@}" >&2
+    [[ "${arg_verbose}" = 1 ]] && spoon_log "${*}" >&2
+}
+
+very_verbose_log() {
+    [[ "${arg_very_verbose}" = 1 ]] && spoon_log "${*}" >&2
 }
 
 has_short_flag() {
@@ -56,11 +65,11 @@ get_config() {
     [[ ! -d "$SPOON_HOME_DIR" ]] && mkdir -p "$SPOON_HOME_DIR"
     [[ ! -f "$CONFIG_FILE_PATH" ]] && echo '{}' > "$CONFIG_FILE_PATH"
     if ! jq . "$CONFIG_FILE_PATH" >/dev/null 2>&1; then
-        echo "[spoon] Error: $CONFIG_FILE_PATH is not valid JSON" 1>&2
+        spoon_log "Error: $CONFIG_FILE_PATH is not valid JSON" 1>&2
         exit 1
     fi
     if ! result="$(jq "$jq_expression" "$CONFIG_FILE_PATH" 2>&1)"; then
-        echo "[spoon] Error while executing jq '${jq_expression}' $CONFIG_FILE_PATH" 1>&2
+        spoon_log "Error while executing jq '${jq_expression}' $CONFIG_FILE_PATH" 1>&2
         exit 1
     fi
     echo "$result"

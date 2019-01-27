@@ -1,15 +1,13 @@
 #!/usr/bin/env bash
 
 declare nodes
-declare arg_verbose
-declare arg_verybose
 declare arg_dry_run
 declare arg_docker
 declare CONFIG_FILE_PATH
 
 spoon_ssh() {
     node_count=$(echo "${nodes}" | jq '. | length')
-    verbose_log "[spoon] number of instances: ${node_count}"
+    verbose_log "number of instances: ${node_count}"
     if ! is_vpc=$(check_all_or_none_vpc); then
         echo Cannot mix VPC and non-VPC nodes.
         exit 1
@@ -55,37 +53,36 @@ check_uniform_vpc() {
 }
 
 ssh_multiple_vpc() {
-    verbose_log "[spoon] All nodes are in VPC."
+    verbose_log "All nodes are in VPC."
     
     ips=$(echo "${nodes}" | jq '.[].privateIp' | tr -d '"' | xargs)
-    verbose_log "[spoon] IP addresses:"
-    [[ "${arg_verbose}" = 1 ]] && for ip in ${ips}; do echo "${ip}"; done
+    verbose_log "IP addresses:\\n${ips// /\\n}"
     
     check_cssh_availability
     
     vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
-    verbose_log "[spoon] VPC ID: ${vpc}"
+    verbose_log "VPC ID: ${vpc}"
     if ! vpc_config="$(get_config ".vpcJumphosts[\"$vpc\"]")"; then
-        echo "[spoon] Error while reading $CONFIG_FILE_PATH"
+        spoon_log "Error while reading $CONFIG_FILE_PATH"
         exit 1
     fi
     if [[ "$vpc_config" = "null" ]]; then
-        echo "[spoon] Error: ${vpc} is not listed in $CONFIG_FILE_PATH"
+        spoon_log "Error: ${vpc} is not listed in $CONFIG_FILE_PATH"
         exit 1
     fi
-    [[ $arg_verybose = 1 ]] && echo "[spoon] VPC jumphost config:" && echo "$vpc_config"
+    very_verbose_log "VPC jumphost config:" && echo "$vpc_config"
     jumphosts="$(echo "$vpc_config" | jq 'map("root@" + .) | join(",")' | tr -d '"')"
     
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
-        [[ "${arg_dry_run}" = 1 ]] && echo "[spoon] dry run, not calling i2cssh" && return
-        verbose_log "[spoon] calling i2cssh"
+        [[ "${arg_dry_run}" = 1 ]] && spoon_log "dry run, not calling i2cssh" && return
+        verbose_log "calling i2cssh"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
         i2cssh -XJ="$jumphosts" -Xl=root $ips
         echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
     else
-        [[ "${arg_dry_run}" = 1 ]] && echo "[spoon] dry run, not calling csshx" && return
-        verbose_log "[spoon] calling csshx"
+        [[ "${arg_dry_run}" = 1 ]] && spoon_log "dry run, not calling csshx" && return
+        verbose_log "calling csshx"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
         csshx --ssh_args "-J $jumphosts -o StrictHostKeyChecking=no -l root" $ips
@@ -93,14 +90,13 @@ ssh_multiple_vpc() {
 }
 
 ssh_multiple_non_vpc() {
-    verbose_log "[spoon] None of the nodes are in VPC."
+    verbose_log "None of the nodes are in VPC."
     ips=$(echo "${nodes}" | jq '.[].publicIp' | tr -d '"' | xargs)
-    verbose_log "[spoon] IP addresses:"
-    [[ "${arg_verbose}" = 1 ]] && for ip in ${ips}; do echo "${ip}"; done
+    verbose_log "IP addresses:\\n${ips// /\\n}"
     [[ "${arg_dry_run}" = 1 ]] && return
     check_cssh_availability
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
-        verbose_log "[spoon] calling i2cssh"
+        verbose_log "calling i2cssh"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
         i2cssh --login root $ips
@@ -108,7 +104,7 @@ ssh_multiple_non_vpc() {
         # passing -o options (StrictHostKeyChecking) to i2cssh is currently not supported
         # see https://github.com/wouterdebie/i2cssh/issues/89 and https://github.com/wouterdebie/i2cssh/issues/79
     else
-        verbose_log "[spoon] calling csshx"
+        verbose_log "calling csshx"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
         csshx --login root --ssh_args "-o StrictHostKeyChecking=no" $ips
@@ -116,7 +112,7 @@ ssh_multiple_non_vpc() {
 }
 
 check_cssh_availability() {
-    verbose_log "[spoon] TERM_PROGRAM is ${TERM_PROGRAM}"
+    verbose_log "TERM_PROGRAM is ${TERM_PROGRAM}"
     if [[ "${TERM_PROGRAM}" == iTerm.app ]]; then
         if ! command -v i2cssh >/dev/null; then
             echo Please install i2cssh to SSH to multiple instances.
@@ -131,25 +127,25 @@ check_cssh_availability() {
 }
 
 ssh_single_vpc() {
-    verbose_log "[spoon] The selected node is in VPC."
+    verbose_log "The selected node is in VPC."
     ip=$(echo "${nodes}" | jq '.[0].privateIp' | tr -d '"')
-    verbose_log "[spoon] IP address: ${ip}"
+    verbose_log "IP address: ${ip}"
     vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
-    verbose_log "[spoon] VPC: ${vpc}" 
+    verbose_log "VPC: ${vpc}" 
     if ! vpc_config="$(get_config ".vpcJumphosts[\"$vpc\"]")"; then
         exit 1
     fi
     if [[ "$vpc_config" = "null" ]]; then
-        echo "[spoon] Error: ${vpc} is not listed in $CONFIG_FILE_PATH"
+        spoon_log "Error: ${vpc} is not listed in $CONFIG_FILE_PATH"
         exit 1
     fi
-    [[ $arg_verybose = 1 ]] && echo "[spoon] VPC jumphost config:" && echo "$vpc_config"
+    very_verbose_log "VPC jumphost config:" && echo "$vpc_config"
     jumphosts="$(echo "$vpc_config" | jq 'map("root@" + .) | join(",")' | tr -d '"')"
     if [[ "${arg_dry_run}" = 1 ]]; then
-        verbose_log "[spoon] Dry run, not calling SSH."
+        verbose_log "Dry run, not calling SSH."
         return
     fi
-    verbose_log "[spoon] calling ssh"
+    verbose_log "calling ssh"
     if [[ "${arg_docker}" = 1 ]]; then
         ssh -o StrictHostKeyChecking=no -J "$jumphosts" -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
     else
@@ -160,14 +156,14 @@ ssh_single_vpc() {
 }
 
 ssh_single_non_vpc() {
-    verbose_log "[spoon] The selected node is not in VPC."
+    verbose_log "The selected node is not in VPC."
     ip=$(echo "${nodes}" | jq '.[0].publicIp' | tr -d '"')
-    verbose_log "[spoon] IP address: ${ip}"
+    verbose_log "IP address: ${ip}"
     if [[ "${arg_dry_run}" = 1 ]]; then
-        verbose_log "[spoon] Dry run, not calling SSH."
+        verbose_log "Dry run, not calling SSH."
         return
     fi
-    verbose_log "[spoon] calling ssh"
+    verbose_log "calling ssh"
     if [[ "${arg_docker}" = 1 ]]; then
         ssh -o StrictHostKeyChecking=no -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
     else
