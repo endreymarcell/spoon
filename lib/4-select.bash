@@ -2,48 +2,56 @@
 
 declare arg_all
 declare arg_verybose
+declare arg_interactive
 
 spoon_select_from_multiple() {
     if [[ $arg_all = 0 ]] && [[ $node_count -gt 1 ]]; then
         nodes_data="$(echo "${nodes}" | jq '.[] | .id + " " + .service + " " + (if .publicIp then .publicIp else ("*" + .privateIp) end) + " (" + .state + ")"' | tr -d '\"')"
         if [[ "$arg_interactive" = 1 ]]; then
-            set_nodes_with_peco
+            select_indices_with_peco
         else
-            set_nodes_with_selector
+            select_indices_with_selector
+        fi
+        [[ "${arg_verybose}" = 1 ]] && echo "[spoon] selected indices: $selected_indices"
+        if [[ "${selected_indices}" = "" ]]; then
+            verbose_log "[spoon] no instances selected"
+            nodes='[]'
+            return
+        elif [[ "${selected_indices}" = '*' ]]; then
+            verbose_log "[spoon] all instances selected"
+        else
+            jq_range_expression="$(jqrangify "${selected_indices}")"
+            [[ "${arg_verybose}" = 1 ]] && echo "[spoon] jq range expression: ${jq_range_expression}"
+            if ! nodes="$(echo "${nodes}" | jq "${jq_range_expression}" 2>/dev/null)"; then
+                echo "[spoon] jq error: invalid selector"
+                exit 1
+            fi
+            node_count=$(echo "${nodes}" | jq '. | length')
+            if [[ "${node_count}" -eq 0 ]]; then
+                echo "[spoon] no instances selected"
+                nodes='[]'
+                return
+            fi
+            [[ "${arg_verybose}" = 1 ]] && echo -e "[spoon] selected instances:\\n${nodes}"
         fi
     fi
 }
 
-set_nodes_with_peco() {
-    echo not implemented yet
-    exit 1
+select_indices_with_peco() {
+    if ! command -v peco >/dev/null 2>&1; then
+        echo "[spoon] please install peco to use interactive mode (https://github.com/peco/peco)"
+        exit 1
+    fi
+    verbose_log "[spoon] selecting nodes with peco"
+    PECO_PROMPT="(Ctrl+Space to select multiple) QUERY>"
+    selected_lines="$(echo "${nodes_data}"| nl '-s) ' | column -t | peco --initial-filter Fuzzy --prompt "${PECO_PROMPT}")"
+    selected_indices="$(echo "$selected_lines" | awk '{print $1}' | tr -d ')' | xargs)"
 }
 
-set_nodes_with_selector() {
+select_indices_with_selector() {
+    verbose_log "[spoon] selecting nodes with the built-in prompt"
     echo "${nodes_data}"| nl '-s) ' | column -t
     echo "*)  all"
     echo "ranges are also allowed, eg. 1, 3, 5-8"
-    read -rp '==> ' reply
-    if [[ "${reply}" = "" ]]; then
-        verbose_log "[spoon] no instances selected"
-        nodes='[]'
-        return
-    fi
-    if [[ "${reply}" = '*' ]]; then
-        verbose_log "[spoon] all instances selected"
-    else
-        jq_range_expression="$(jqrangify "${reply}")"
-        [[ "${arg_verybose}" = 1 ]] && echo "[spoon] jq range expression: ${jq_range_expression}"
-        if ! nodes="$(echo "${nodes}" | jq "${jq_range_expression}" 2>/dev/null)"; then
-            echo "[spoon] jq error: invalid selector"
-            exit 1
-        fi
-        node_count=$(echo "${nodes}" | jq '. | length')
-        if [[ "${node_count}" -eq 0 ]]; then
-            echo "[spoon] no instances selected"
-            nodes='[]'
-            return
-        fi
-        [[ "${arg_verybose}" = 1 ]] && echo -e "[spoon] selected instances:\\n${nodes}"
-    fi
+    read -rp '==> ' selected_indices
 }

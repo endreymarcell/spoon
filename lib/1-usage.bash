@@ -5,11 +5,6 @@ declare identifier
 
 
 spoon_usage_and_help() {
-    if [[ ${#spoon_args[@]} -lt 1 ]]; then
-        print_help
-        exit 1
-    fi
-
     if has_short_flag h "${spoon_args[@]}" || has_long_flag help "${spoon_args[@]}"; then
         print_help
         exit 0
@@ -36,7 +31,7 @@ print_help() {
 }
 
 spoon_set_args() {
-    identifier="${spoon_args[-1]}"
+    [[ "${#spoon_args[@]}" -ge 1 ]] && identifier="${spoon_args[-1]}"
 
     if has_short_flag i "${spoon_args[@]}" || has_long_flag interactive "${spoon_args[@]}"; then arg_interactive=1; else arg_interactive=0; fi
     if has_short_flag p "${spoon_args[@]}" || has_long_flag preprod "${spoon_args[@]}"; then arg_preprod=1; else arg_preprod=0; fi
@@ -51,7 +46,7 @@ spoon_set_args() {
     # shellcheck disable=SC2034
     if has_short_flag V "${spoon_args[@]}"; then arg_verbose=1 && arg_verybose=1; else arg_verybose=0; fi
 
-    if [[ "${identifier}" =~ ^- ]]; then
+    if [[ "${#spoon_args[@]}" -lt 1 ]] || [[ "${identifier}" =~ ^- ]]; then
         [[ ${arg_verybose} = 1 ]] && echo "[spoon] empty identifier, setting mode to interactive"
         identifier=""
         arg_interactive=1
