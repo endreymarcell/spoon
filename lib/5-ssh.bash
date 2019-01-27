@@ -105,6 +105,8 @@ ssh_multiple_non_vpc() {
         # shellcheck disable=SC2086
         i2cssh --login root $ips
         echo hint: press Cmd+Shift+I to send your keyboard input to all the instances
+        # passing -o options (StrictHostKeyChecking) to i2cssh is currently not supported
+        # see https://github.com/wouterdebie/i2cssh/issues/89 and https://github.com/wouterdebie/i2cssh/issues/79
     else
         verbose_log "[spoon] calling csshx"
         # I actually need the word splitting here, hence the lack of quotes
