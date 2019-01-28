@@ -10,16 +10,16 @@
     {
         "id": "i-abcd2345",
         "publicIp": "2.2.2.2",
-        "privateIp": null,
-        "vpc": null,
+        "privateIp": "20.20.20.20",
+        "vpc": "vpc-1",
         "service": "fooservice-prod",
         "state": "running"
     },
     {
         "id": "i-abcd3456",
-        "publicIp": "3.3.3.3",
-        "privateIp": null,
-        "vpc": null,
+        "publicIp": null,
+        "privateIp": "3.3.3.3",
+        "vpc": "vpc-1",
         "service": "fooservice-prod",
         "state": "running"
     }

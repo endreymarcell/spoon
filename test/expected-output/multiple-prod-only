@@ -1,5 +1,5 @@
-1)  i-abcd1234  fooservice-prod  1.1.1.1  -  (running)
-2)  i-abcd2345  fooservice-prod  2.2.2.2  -  (running)
-3)  i-abcd3456  fooservice-prod  3.3.3.3  -  (running)
+1)  i-abcd1234  fooservice-prod  1.1.1.1  -  -  (running)
+2)  i-abcd2345  fooservice-prod  2.2.2.2  -  -  (running)
+3)  i-abcd3456  fooservice-prod  3.3.3.3  -  -  (running)
 *)  all
 (ranges are also allowed, eg. 1, 3, 5-8)

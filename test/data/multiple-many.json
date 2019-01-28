@@ -2,7 +2,7 @@
     {
         "id": "i-abcd1234",
         "publicIp": "1.1.1.1",
-        "privateIp": "192.168.100.1",
+        "privateIp": null,
         "vpc": null,
         "service": "1-fooservice",
         "state": "running"
@@ -10,7 +10,7 @@
     {
         "id": "i-abcd2345",
         "publicIp": "2.2.2.2",
-        "privateIp": "192.168.100.2",
+        "privateIp": null,
         "vpc": null,
         "service": "2-fooservice",
         "state": "running"
@@ -18,7 +18,7 @@
     {
         "id": "i-abcd3456",
         "publicIp": "3.3.3.3",
-        "privateIp": "192.168.100.3",
+        "privateIp": null,
         "vpc": null,
         "service": "3-fooservice",
         "state": "running"
@@ -26,7 +26,7 @@
     {
         "id": "i-abcd4567",
         "publicIp": "4.4.4.4",
-        "privateIp": "192.168.100.4",
+        "privateIp": null,
         "vpc": null,
         "service": "4-fooservice",
         "state": "running"
@@ -34,7 +34,7 @@
     {
         "id": "i-abcd5678",
         "publicIp": "5.5.5.5",
-        "privateIp": "192.168.100.5",
+        "privateIp": null,
         "vpc": null,
         "service": "5-fooservice",
         "state": "running"
@@ -42,7 +42,7 @@
     {
         "id": "i-abcd6789",
         "publicIp": "6.6.6.6",
-        "privateIp": "192.168.100.6",
+        "privateIp": null,
         "vpc": null,
         "service": "6-fooservice",
         "state": "running"
@@ -50,7 +50,7 @@
     {
         "id": "i-abcd7890",
         "publicIp": "7.7.7.7",
-        "privateIp": "192.168.100.7",
+        "privateIp": null,
         "vpc": null,
         "service": "7-fooservice",
         "state": "running"
@@ -58,7 +58,7 @@
     {
         "id": "i-abcd890A",
         "publicIp": "8.8.8.8",
-        "privateIp": "192.168.100.8",
+        "privateIp": null,
         "vpc": null,
         "service": "8-fooservice",
         "state": "running"
@@ -66,7 +66,7 @@
     {
         "id": "i-abcd90AB",
         "publicIp": "9.9.9.9",
-        "privateIp": "192.168.100.9",
+        "privateIp": null,
         "vpc": null,
         "service": "9-fooservice",
         "state": "running"

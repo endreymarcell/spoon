@@ -1,8 +1,8 @@
 [
     {
         "id": "i-abcd1234",
-        "publicIp": null,
-        "privateIp": "192.168.100.1",
+        "publicIp": "1.1.1.1",
+        "privateIp": "2.2.2.2",
         "vpc": "vpc-1",
         "service": "fooservice",
         "state": "running"

@@ -2,7 +2,7 @@
     {
         "id": "i-abcd1234",
         "publicIp": "1.1.1.1",
-        "privateIp": "192.168.100.1",
+        "privateIp": null,
         "vpc": null,
         "service": "fooservice-prod",
         "state": "running"
@@ -10,7 +10,7 @@
     {
         "id": "i-abcd2345",
         "publicIp": "2.2.2.2",
-        "privateIp": "192.168.100.2",
+        "privateIp": null,
         "vpc": null,
         "service": "fooservice-preprod",
         "state": "running"

@@ -124,3 +124,12 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     assert_success
     assert_output "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-vpc)"
 }
+
+@test "Public IP, private IP and VPC ID are all printed properly." {
+    mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple-public-private-mixed-ip.json)"
+
+    run $spoon foo <<< ''
+
+    assert_success
+    assert_output "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-public-private-mixed-ip)"
+}
