@@ -25,10 +25,10 @@ setup() {
 	export mock_ssh_path="$(mock_create)"
 	export mock_csshx_path="$(mock_create)"
 	export mock_i2cssh_path="$(mock_create)"
-	export mock_peco_path="$(mock_create)"
+	export mock_fzf_path="$(mock_create)"
 	export mock_command_path="$(mock_create)"
 
-	export -f aws ssh csshx i2cssh peco command
+	export -f aws ssh csshx i2cssh fzf command
 
 	spoon="$BATS_TEST_DIRNAME/../spoon"
 
@@ -52,8 +52,8 @@ i2cssh() {
 	bash "${mock_i2cssh_path}" "${@}"
 }
 
-peco() {
-	bash "${mock_peco_path}" "${@}"
+fzf() {
+	bash "${mock_fzf_path}" "${@}"
 }
 
 command() {

@@ -7,7 +7,7 @@ spoon_select_from_multiple() {
     if [[ $arg_all = 0 ]] && [[ $node_count -gt 1 ]]; then
         nodes_data="$(echo "${nodes}" | jq '.[] | .id + " " + .service + " " + (if .publicIp then .publicIp else "-" end) + " " + (if .privateIp then "*" + .privateIp else "-" end) + " " + (if .vpc then .vpc else "-" end) + " (" + .state + ")"' | tr -d '\"')"
         if [[ "$arg_interactive" = 1 ]]; then
-            select_indices_with_peco
+            select_indices_with_fzf
         else
             select_indices_with_selector
         fi
@@ -36,14 +36,13 @@ spoon_select_from_multiple() {
     fi
 }
 
-select_indices_with_peco() {
-    if ! command -v peco >/dev/null 2>&1; then
-        spoon_log "please install peco to use interactive mode (https://github.com/peco/peco)"
+select_indices_with_fzf() {
+    if ! command -v fzf >/dev/null 2>&1; then
+        spoon_log "please install fzf to use interactive mode (https://github.com/junegunn/fzf)"
         exit 1
     fi
-    verbose_log "selecting nodes with peco"
-    PECO_PROMPT="(Ctrl+Space to select multiple) QUERY>"
-    selected_lines="$(echo "${nodes_data}"| nl '-s) ' | column -t | peco --initial-filter Fuzzy --prompt "${PECO_PROMPT}")"
+    verbose_log "selecting nodes with fzf"
+    selected_lines="$(echo "${nodes_data}"| nl '-s) ' | column -t | fzf --multi --reverse --header="(Tab to select multiple)")"
     selected_indices="$(echo "$selected_lines" | awk '{print $1}' | tr -d ')' | xargs)"
 }
 
