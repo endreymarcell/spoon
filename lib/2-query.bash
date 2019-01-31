@@ -72,6 +72,10 @@ get_instances_from_aws() {
 
 query_aws() {
     verbose_log "querying aws..."
+    very_verbose_log query to load instances from aws:
+    # the linter incorrectly assumes that I want to expand an expression here
+    # shellcheck disable=SC2016
+    very_verbose_log aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, publicIp: PublicIpAddress, privateIp: PrivateIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0], vpc: VpcId}[0]' "${@}"
     # The backticks are part of the JMESPath expression and should be
     # passed literally, not interpolated - disable relevant shellcheck rule.
     # shellcheck disable=SC2016
@@ -109,6 +113,10 @@ spoon_build_cache() {
 
 cache_nodes_from_aws() {
     [[ ! -d "$SPOON_HOME_DIR" ]] && mkdir -p "$SPOON_HOME_DIR"
+    very_verbose_log query to cache instances from aws:
+    # the linter incorrectly assumes that I want to expand an expression here
+    # shellcheck disable=SC2016
+    very_verbose_log aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, publicIp: PublicIpAddress, privateIp: PrivateIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0], vpc: VpcId}[0]'
     # the linter incorrectly assumes that I want to expand an expression here
     # shellcheck disable=SC2016
     aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, publicIp: PublicIpAddress, privateIp: PrivateIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0], vpc: VpcId}[0]' | jq 'map(select(.service != "null" and .service != null))' > "${CACHE_FILE_PATH}.tmp"

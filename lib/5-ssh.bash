@@ -76,6 +76,7 @@ ssh_multiple_vpc() {
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
         [[ "${arg_dry_run}" = 1 ]] && spoon_log "dry run, not calling i2cssh" && exit 0
         verbose_log "calling i2cssh"
+        very_verbose_log i2cssh -XJ="$jumphosts" -Xl=root "$ips"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
         i2cssh -XJ="$jumphosts" -Xl=root $ips
@@ -83,6 +84,7 @@ ssh_multiple_vpc() {
     else
         [[ "${arg_dry_run}" = 1 ]] && spoon_log "dry run, not calling csshx" && exit 0
         verbose_log "calling csshx"
+        very_verbose_log csshx --ssh_args "-J $jumphosts -o StrictHostKeyChecking=no -l root" "$ips"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
         csshx --ssh_args "-J $jumphosts -o StrictHostKeyChecking=no -l root" $ips
@@ -97,6 +99,7 @@ ssh_multiple_non_vpc() {
     check_cssh_availability
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
         verbose_log "calling i2cssh"
+        very_verbose_log i2cssh -Xl=root "$ips"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
         i2cssh -Xl=root $ips
@@ -105,6 +108,7 @@ ssh_multiple_non_vpc() {
         # see https://github.com/wouterdebie/i2cssh/issues/89 and https://github.com/wouterdebie/i2cssh/issues/79
     else
         verbose_log "calling csshx"
+        very_verbose_log csshx --ssh_args "-o StrictHostKeyChecking=no -l root" "$ips"
         # I actually need the word splitting here, hence the lack of quotes
         # shellcheck disable=SC2086
         csshx --ssh_args "-o StrictHostKeyChecking=no -l root" $ips
@@ -147,8 +151,12 @@ ssh_single_vpc() {
     fi
     verbose_log "calling ssh"
     if [[ "${arg_docker}" = 1 ]]; then
+        # linter: I don't want to expand any expressions now
+        # shellcheck disable=SC2016
+        very_verbose_log ssh -o StrictHostKeyChecking=no -J "$jumphosts" -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
         ssh -o StrictHostKeyChecking=no -J "$jumphosts" -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
     else
+        very_verbose_log ssh -o StrictHostKeyChecking=no -J "$jumphosts" -l root "${ip}"
         # the linter thinks "ip" is a command for the server. it is not.
         # shellcheck disable=SC2029
         ssh -o StrictHostKeyChecking=no -J "$jumphosts" -l root "${ip}"
@@ -165,8 +173,12 @@ ssh_single_non_vpc() {
     fi
     verbose_log "calling ssh"
     if [[ "${arg_docker}" = 1 ]]; then
+        # linter: I don't want to expand any expressions now
+        # shellcheck disable=SC2016
+        very_verbose_log ssh -o StrictHostKeyChecking=no -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
         ssh -o StrictHostKeyChecking=no -l root "${ip}" -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
     else
+        very_verbose_log ssh -o StrictHostKeyChecking=no -l root "${ip}"
         # the linter thinks "ip" is a command for the server. it is not.
         # shellcheck disable=SC2029
         ssh -o StrictHostKeyChecking=no -l root "${ip}"
