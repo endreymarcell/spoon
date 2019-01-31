@@ -42,7 +42,11 @@ select_indices_with_fzf() {
         exit 1
     fi
     verbose_log "selecting nodes with fzf"
-    selected_lines="$(echo "${nodes_data}"| nl '-s) ' | column -t | fzf --multi --reverse --header="(Tab to select multiple)")"
+    height_param=""
+    if [[ "$node_count" -le 12 ]]; then
+        height_param="--height=$((node_count + 3))"
+    fi
+    selected_lines="$(echo "${nodes_data}"| nl '-s) ' | column -t | fzf --multi --reverse --header="(Tab to select multiple)" ${height_param})"
     selected_indices="$(echo "$selected_lines" | awk '{print $1}' | tr -d ')' | xargs)"
 }
 
