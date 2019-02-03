@@ -54,12 +54,12 @@ check_same_vpc() {
 
 ssh_multiple_vpc() {
     verbose_log "All nodes are in VPC."
-    
+
     ips=$(echo "${nodes}" | jq '.[].privateIp' | tr -d '"' | xargs)
     verbose_log "IP addresses:\\n${ips// /\\n}"
-    
+
     check_cssh_availability
-    
+
     vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
     verbose_log "VPC ID: ${vpc}"
     if ! vpc_config="$(get_config ".vpcJumphosts[\"$vpc\"]")"; then
@@ -72,7 +72,7 @@ ssh_multiple_vpc() {
     fi
     very_verbose_log "VPC jumphost config:" && echo "$vpc_config"
     jumphosts="$(echo "$vpc_config" | jq 'map("root@" + .) | join(",")' | tr -d '"')"
-    
+
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
         [[ "${arg_dry_run}" = 1 ]] && spoon_log "dry run, not calling i2cssh" && exit 0
         verbose_log "calling i2cssh"
@@ -95,7 +95,10 @@ ssh_multiple_non_vpc() {
     verbose_log "None of the nodes are in VPC."
     ips=$(echo "${nodes}" | jq '.[].publicIp' | tr -d '"' | xargs)
     verbose_log "IP addresses:\\n${ips// /\\n}"
-    [[ "${arg_dry_run}" = 1 ]] && exit 0
+    if [[ "${arg_dry_run}" = 1 ]]; then
+        verbose_log "Dry run, not calling SSH."
+        exit 0
+    fi
     check_cssh_availability
     if [[ "$TERM_PROGRAM" == "iTerm.app" ]]; then
         verbose_log "calling i2cssh"
@@ -135,7 +138,7 @@ ssh_single_vpc() {
     ip=$(echo "${nodes}" | jq '.[0].privateIp' | tr -d '"')
     verbose_log "IP address: ${ip}"
     vpc=$(echo "${nodes}" | jq '.[0].vpc' | tr -d '"')
-    verbose_log "VPC: ${vpc}" 
+    verbose_log "VPC: ${vpc}"
     if ! vpc_config="$(get_config ".vpcJumphosts[\"$vpc\"]")"; then
         exit 1
     fi

@@ -13,11 +13,11 @@ spoon_log() {
 }
 
 verbose_log() {
-    [[ "${arg_verbose}" = 1 ]] && spoon_log "${*}" >&2
+    [[ "${arg_verbose}" = 1 ]] && spoon_log "[verbose] ${*}" >&2
 }
 
 very_verbose_log() {
-    [[ "${arg_very_verbose}" = 1 ]] && spoon_log "${*}" >&2
+    [[ "${arg_very_verbose}" = 1 ]] && spoon_log "[very verbose] ${*}" >&2
 }
 
 has_short_flag() {
