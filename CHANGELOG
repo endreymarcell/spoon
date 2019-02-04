@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.3
+2019.02.04.
+- Recognize instance ids automatically.
+- Better cache handling (create cache even if SSH fails, start creating earlier to save time).
+- Support for VPC.
+- Interactive mode with fzf.
+
 ## v2.1
 2018.12.16.
 - Add docker support again after the rewrite.

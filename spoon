@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SPOON_VERSION=2.2
+SPOON_VERSION=2.3
 
 source lib/0-utils.bash
 source lib/1-usage.bash
