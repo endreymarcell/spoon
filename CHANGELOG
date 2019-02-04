@@ -1,0 +1,25 @@
+# Changelog
+
+## v2.1
+2018.12.16.
+- Add docker support again after the rewrite.
+- Cache AWS response for 24 hours.
+- Test in docker.
+
+## v2.0
+2018.12.02.
+- Complete rewrite to improve code quality. Supports preprod/prod filtering, first/all instance selection, dry run and versbose logging.
+- Tested with bats and linted with shellcheck.
+
+## v1.2
+2018.06.18.
+- Add support for i2cssh on iTerm2.
+- New switches for preprod/prod (-p/-P besides -e/-o).
+
+## v1.1
+2018.01.15.
+- Select indices of listed nodes (eg. "1, 3, 5-8")
+
+## v1.0
+2018.01.02.
+- Initial version. Supports preprod/prod filtering, plus docker and/or virtualenv activation.
