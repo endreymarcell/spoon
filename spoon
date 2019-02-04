@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+SPOON_VERSION=2.2
+
 source lib/0-utils.bash
 source lib/1-usage.bash
 source lib/2-query.bash
@@ -8,7 +10,7 @@ source lib/4-select.bash
 source lib/5-ssh.bash
 
 spoon_args=( "${@}" )
-spoon_usage_and_help
+spoon_about
 spoon_set_args
 spoon_check_args
 spoon_verybose_print_args

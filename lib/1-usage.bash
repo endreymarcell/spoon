@@ -3,9 +3,13 @@
 declare spoon_args
 declare identifier
 
-spoon_usage_and_help() {
+spoon_about() {
     if has_short_flag h "${spoon_args[@]}" || has_long_flag help "${spoon_args[@]}"; then
         print_help
+        exit 0
+    fi
+    if has_long_flag version "${spoon_args[@]}"; then
+        echo "$SPOON_VERSION"
         exit 0
     fi
 }
