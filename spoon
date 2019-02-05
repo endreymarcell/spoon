@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SPOON_VERSION=2.3
+SPOON_VERSION=2.3.1
 
 lib_root="$(dirname "$0")/lib"
 source "${lib_root}/0-utils.bash"
