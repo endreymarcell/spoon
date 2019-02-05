@@ -11,10 +11,8 @@ Easily SSH into EC2 nodes.
 brew tap endreymarcell/homebrew-marca
 brew install spoon
 ```
-Requirements: [awscli](https://aws.amazon.com/cli/), [jq](https://stedolan.github.io/jq/) (spoon installs these automatically if they're missing)  
-Optional: [csshx](https://github.com/brockgr/csshx) or [i2cssh](https://github.com/wouterdebie/i2cssh)  
-
-(Note: spoon is a single executable bash script, so if you can't/don't want to use Homebrew, you can just copy the file and put it on your path.)  
+Requirements: [awscli](https://aws.amazon.com/cli/), [jq](https://stedolan.github.io/jq/)
+Optional: [csshx](https://github.com/brockgr/csshx) (if you're using Terminal) or [i2cssh](https://github.com/wouterdebie/i2cssh) (if you're using iTerm2)
 
 ## Usage
 
