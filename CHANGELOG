@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.2
+2019.02.06.
+- Fix lib file sourcing even better so that spoon actually works after brew install.
+
 ## v2.3.1
 2019.02.05.
 - Fix lib file sourcing so that spoon works after brew install.
