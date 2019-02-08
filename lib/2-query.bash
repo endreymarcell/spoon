@@ -46,6 +46,11 @@ get_instances_from_cache() {
 }
 
 get_instances_from_aws() {
+    if is_expected_long_query; then
+        spoon_log "Querying AWS... (this might take up to 10 seconds)"
+    else
+        spoon_log Querying AWS...
+    fi
     if is_identifier_instance_id; then
         nodes=$(query_aws_by_id "$identifier")
     else
@@ -121,4 +126,29 @@ cache_nodes_from_aws() {
     # shellcheck disable=SC2016
     aws ec2 describe-instances --query 'Reservations[*].Instances[*].{id: InstanceId, publicIp: PublicIpAddress, privateIp: PrivateIpAddress, state: State.Name, service: (Tags[?Key == `"Name"`].Value)[0], vpc: VpcId}[0]' | jq 'map(select(.service != "null" and .service != null))' > "${CACHE_FILE_PATH}.tmp"
     mv "${CACHE_FILE_PATH}.tmp" "${CACHE_FILE_PATH}"
+}
+
+is_expected_long_query() {
+    if [[ "${identifier}" = "" ]]; then
+        verbose_log "Empty identifier, expecting long-running query."
+        return 0
+    fi
+    if ! is_cache_present; then
+        verbose_log No cache file present, cannot estimate query time.
+        return 1
+    fi
+    
+    if is_identifier_instance_id; then
+        outdated_cached_nodes_count=$(jq "map(select(.id == \"${identifier}\")) | length" "$CACHE_FILE_PATH")
+    else
+        outdated_cached_nodes_count=$(jq "map(select(.service | test(\".*${identifier}.*\"))) | length" "$CACHE_FILE_PATH")
+    fi
+    verbose_log "Estimating query size: ${outdated_cached_nodes_count} occurrences found in the outdated cache."
+    if [[ "$outdated_cached_nodes_count" -ge 20 ]]; then
+        verbose_log "This is above the threshold, expecting long-running query."
+        return 0
+    else
+        verbose_log "This is belove the threshold, expecting quick query."
+        return 1
+    fi
 }
