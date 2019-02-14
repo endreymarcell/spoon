@@ -31,7 +31,7 @@ source "$BATS_TEST_DIRNAME/../lib/0-utils.bash"
     run $spoon foo
 
     assert_failure
-    assert_output "[spoon] Error: $CONFIG_FILE_PATH is not valid JSON"
+    assert_output --partial "[spoon] Error: $CONFIG_FILE_PATH is not valid JSON"
 }
 
 @test "If the VPC ID is not listed in the config file, spoon exits." {
@@ -41,7 +41,7 @@ source "$BATS_TEST_DIRNAME/../lib/0-utils.bash"
     run $spoon foo
 
     assert_failure
-    assert_output "[spoon] Error: vpc-1 is not listed in /root/.spoon/config.json"
+    assert_output --partial "[spoon] Error: vpc-1 is not listed in /root/.spoon/config.json"
 }
 
 @test "If the selected instance is in VPC, the private IP is used, even if a public IP is also present." {

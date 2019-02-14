@@ -8,7 +8,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -P foo
 
     assert_failure
-    assert_output "[spoon] No instances found for identifier 'foo' after filtering for prod."
+    assert_output --partial "[spoon] No instances found for identifier 'foo' after filtering for prod."
 }
 
 @test "Filtering for prod: one instance returned." {
@@ -27,7 +27,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -P foo <<< ''
 
     assert_success
-    assert_output "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-prod-only)"
+    assert_output --partial "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-prod-only)"
 }
 
 @test "Filtering for preprod: no instances returned." {
@@ -36,7 +36,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -p foo
 
     assert_failure
-    assert_output "[spoon] No instances found for identifier 'foo' after filtering for preprod."
+    assert_output --partial "[spoon] No instances found for identifier 'foo' after filtering for preprod."
 }
 
 @test "Filtering for preprod: one instance returned." {
@@ -55,7 +55,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -p foo <<< ''
 
     assert_success
-    assert_output "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-preprod-only)"
+    assert_output --partial "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-preprod-only)"
 }
 
 @test "First instance flag with no instances" {
@@ -64,7 +64,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -1 foo
 
     assert_failure
-    assert_output "[spoon] No instances returned from AWS for identifier 'foo'."
+    assert_output --partial "[spoon] No instances returned from AWS for identifier 'foo'."
 }
 
 @test "First instance flag with one instance" {
@@ -93,7 +93,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -a foo
 
     assert_failure
-    assert_output "[spoon] No instances returned from AWS for identifier 'foo'."
+    assert_output --partial "[spoon] No instances returned from AWS for identifier 'foo'."
 }
 
 @test "All instances flag with one instance" {
@@ -122,7 +122,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon foo <<< ''
 
     assert_success
-    assert_output "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-vpc)"
+    assert_output --partial "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-vpc)"
 }
 
 @test "Public IP, private IP and VPC ID are all printed properly." {
@@ -131,5 +131,5 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon foo <<< ''
 
     assert_success
-    assert_output "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-public-private-mixed-ip)"
+    assert_output --partial "$(cat ${BATS_TEST_DIRNAME}/expected-output/multiple-public-private-mixed-ip)"
 }

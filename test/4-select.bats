@@ -109,7 +109,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -i foo
 
     assert_failure
-    assert_output '[spoon] please install fzf to use interactive mode (https://github.com/junegunn/fzf)'
+    assert_output --partial '[spoon] please install fzf to use interactive mode (https://github.com/junegunn/fzf)'
 }
 
 @test "Interactive mode: if fzf is installed, spoon calls it." {

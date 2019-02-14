@@ -17,7 +17,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -a foo
 
     assert_failure
-    assert_output "[spoon] All nodes must be in the same VPC."
+    assert_output --partial "[spoon] All nodes must be in the same VPC."
 }
 
 @test "Spoon passes the correct jumphost param to csshx (single jumphost)." {
