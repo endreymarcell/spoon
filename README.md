@@ -11,12 +11,12 @@ Easily SSH into EC2 nodes.
 brew tap endreymarcell/homebrew-marca
 brew install spoon
 ```
-Requirements: [awscli](https://aws.amazon.com/cli/), [jq](https://stedolan.github.io/jq/)
+Requirements: [awscli](https://aws.amazon.com/cli/), [jq](https://stedolan.github.io/jq/)  
 Optional: [csshx](https://github.com/brockgr/csshx) (if you're using Terminal) or [i2cssh](https://github.com/wouterdebie/i2cssh) (if you're using iTerm2)
 
 ## Usage
 
-`spoon [options] identifier`
+`spoon [options] [identifier]`
 
 __Options:__  
 `-h` or `--help`  
@@ -41,7 +41,8 @@ __Options:__
 &nbsp;&nbsp;&nbsp;&nbsp;don't cache instances  
 
 __Identifier:__  
-If the identifier starts with `i-`, it is recognised as an instence-id. Otherwise, it's taken to be a service name, or at least part of it.
+If the identifier starts with `i-`, it is recognised as an instence-id. Otherwise, it's taken to be a service name, or at least part of it.  
+If no identifier is passed, interactive mode is assumed.  
 
 ## Contribution
 Pull requests are welcome.  
