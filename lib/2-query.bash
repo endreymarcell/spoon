@@ -19,7 +19,7 @@ spoon_get_instances() {
         verbose_log "cache at ${CACHE_FILE_PATH} is not a valid JSON file, querying aws"
         get_instances_from_aws
     else
-        verbose_log "reading cache at ${CACHE_FILE_PATH}"
+        spoon_log "reading cache at ${CACHE_FILE_PATH}"
         get_instances_from_cache
     fi
 }
