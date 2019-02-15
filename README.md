@@ -54,13 +54,9 @@ To do that you have to add these lines to your `~/.spoon/config.json` file:
 ```json
 {
   "vpcJumphosts": {
-    "<VPC-ID-1>": [
+    "<VPC-ID>": [
       "<<Jump-Host-Ip-1>>",
       "<<Jump-Host-Ip-2>>"
-			(...)
-    ],
-    "<VPC-ID-2>: [
-			(...)
     ]
   }
 }
