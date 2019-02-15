@@ -65,7 +65,7 @@ cache=$CACHE_FILE_PATH
 @test "spoon can find a single instance in the cache based on their instance-id." {
 	set_cache_to "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
 
-	run $spoon -i i-abcd2345
+	run $spoon i-abcd2345
 
 	assert_equal $(mock_get_call_num $mock_ssh_path) 1
 	assert_equal_regex "$(mock_get_call_args $mock_ssh_path)" 2.2.2.2
