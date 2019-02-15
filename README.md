@@ -44,6 +44,46 @@ __Identifier:__
 If the identifier starts with `i-`, it is recognised as an instence-id. Otherwise, it's taken to be a service name, or at least part of it.  
 If no identifier is passed, interactive mode is assumed.  
 
+## Accessing nodes inside VPC
+
+If the nodes you want to access are inside a VPC you need a *VPC Jump Host*!
+That is a node that is accessible from the Internet and can access the VPC,
+effectively acting as a bridge between the two networks.
+
+To do that you have to add these lines to your `~/.spoon/config.json` file:
+```json
+{
+  "vpcJumphosts": {
+    "<VPC-ID-1>": [
+      "<<Jump-Host-Ip-1>>",
+      "<<Jump-Host-Ip-2>>"
+			(...)
+    ],
+    "<VPC-ID-2>: [
+			(...)
+    ]
+  }
+}
+```
+
+Example:
+```json
+{
+  "vpcJumphosts": {
+    "vpc-d2ea1f85": [
+      "1.2.3.4"
+    ],
+    "vpc-abe4a5ad": [
+      "1.2.3.4",
+      "200.171.41.43"
+    ],
+    "vpc-be6818d7": [
+      "52.23.42.184"
+    ]
+  }
+}
+```
+
 ## Contribution
 Pull requests are welcome.  
 Run tests with `make test` (requires Docker) and the linter with `make lint` (requires [shellcheck](https://github.com/koalaman/shellcheck)).  
