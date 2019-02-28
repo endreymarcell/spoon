@@ -1,10 +1,10 @@
 .PHONY: test debug lint
 
 test:
-	docker run -t -v "${PWD}:/spoon" endreymarca/bats-ext
+	docker run --rm -t -v "${PWD}:/spoon" endreymarca/bats-ext
 
 debug:
-	docker run -ti -v "${PWD}:/spoon" endreymarca/bats-ext bash
+	docker run --rm -ti -v "${PWD}:/spoon" endreymarca/bats-ext bash
 
 lint:
 	shellcheck -x spoon lib/*
