@@ -36,7 +36,7 @@ EOF
 }
 
 spoon_set_args() {
-    [[ "${#spoon_args[@]}" -ge 1 ]] && identifier="${spoon_args[-1]}"
+    identifier="$(get_identifier "${spoon_args[@]}")"
 
     if has_short_flag i "${spoon_args[@]}" || has_long_flag interactive "${spoon_args[@]}"; then arg_interactive=1; else arg_interactive=0; fi
     if has_short_flag p "${spoon_args[@]}" || has_long_flag preprod "${spoon_args[@]}"; then arg_preprod=1; else arg_preprod=0; fi
