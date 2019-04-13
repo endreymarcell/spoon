@@ -12,7 +12,7 @@
         "publicIp": "2.2.2.2",
         "privateIp": null,
         "vpc": null,
-        "service": "fooservice-preprod",
+        "service": "fooservice-nonprod",
         "state": "running"
     },
     {
@@ -20,7 +20,7 @@
         "publicIp": "3.3.3.3",
         "privateIp": null,
         "vpc": null,
-        "service": "fooservice-preprod",
+        "service": "fooservice-pp",
         "state": "running"
     }
 ]
