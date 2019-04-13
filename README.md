@@ -46,8 +46,8 @@ If no identifier is passed, interactive mode is assumed.
 
 ## Accessing nodes inside VPC
 
-If the nodes you want to access are inside a VPC you need a *VPC Jump Host*!
-That is a node that is accessible from the Internet and can access the VPC,
+If the nodes you want to access are inside a VPC you need to specify your _VPC jump host(s)_.  
+A jump host is a node that is accessible from the internet and can access the VPC,
 effectively acting as a bridge between the two networks.
 
 To do that you have to add these lines to your `~/.spoon/config.json` file:
@@ -66,14 +66,14 @@ Example:
 ```json
 {
   "vpcJumphosts": {
-    "vpc-d2ea1f85": [
+    "vpc-abcd1234": [
       "1.2.3.4"
     ],
-    "vpc-abe4a5ad": [
+    "vpc-asdfasdf": [
       "1.2.3.4",
       "200.171.41.43"
     ],
-    "vpc-be6818d7": [
+    "vpc-ABCDEFGH": [
       "52.23.42.184"
     ]
   }
