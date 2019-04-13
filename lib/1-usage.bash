@@ -9,7 +9,7 @@ spoon_about() {
         exit 0
     fi
     if has_long_flag version "${spoon_args[@]}"; then
-        echo "$SPOON_VERSION"
+        spoon_log "$SPOON_VERSION"
         exit 0
     fi
 }
@@ -60,11 +60,11 @@ spoon_set_args() {
 
 spoon_check_args() {
     if [[ "${arg_prod}" = 1 ]] && [[ "${arg_preprod}" = 1 ]]; then
-        echo "Invalid arguments: -P/--prod and -p/--preprod are mutually exclusive."
+        spoon_log "Invalid arguments: -P/--prod and -p/--preprod are mutually exclusive."
         exit 1
     fi
     if [[ "${arg_first}" = 1 ]] && [[ "${arg_all}" = 1 ]]; then
-        echo "Invalid arguments: -1/--first and -a/--all are mutually exclusive."
+        spoon_log "Invalid arguments: -1/--first and -a/--all are mutually exclusive."
         exit 1
     fi
 }

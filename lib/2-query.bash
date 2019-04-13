@@ -40,7 +40,7 @@ get_instances_from_cache() {
 
     node_count=$(echo "${nodes}" | jq '. | length')
     if [[ "${node_count}" -eq 0 ]]; then
-        echo "No instances found in the cache for identifier '${identifier}'."
+        spoon_log "No instances found in the cache for identifier '${identifier}'."
         exit 1
     fi
 }
