@@ -12,7 +12,9 @@ brew tap endreymarcell/homebrew-marca
 brew install spoon
 ```
 Requirements: [awscli](https://aws.amazon.com/cli/), [jq](https://stedolan.github.io/jq/)  
-Optional: [csshx](https://github.com/brockgr/csshx) (if you're using Terminal) or [i2cssh](https://github.com/wouterdebie/i2cssh) (if you're using iTerm2)
+Optional:  
+* cluster SSH: [csshx](https://github.com/brockgr/csshx) (if you're using Terminal) or [i2cssh](https://github.com/wouterdebie/i2cssh) (if you're using iTerm2)  
+* interactive mode: [fzf](https://github.com/junegunn/fzf)  
 
 ## Usage
 
@@ -39,6 +41,8 @@ __Options:__
 &nbsp;&nbsp;&nbsp;&nbsp;don't try to read instances from the cache  
 `-w` or `--no-cache-write`  
 &nbsp;&nbsp;&nbsp;&nbsp;don't cache instances  
+
+Single-letter options can be combined, ie. you can write `spoon -1pd` instead of `spoon -1 -p -d`.  
 
 __Identifier:__  
 If the identifier starts with `i-`, it is recognised as an instence-id. Otherwise, it's taken to be a service name, or at least part of it.  
