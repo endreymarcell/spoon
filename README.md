@@ -24,7 +24,9 @@ __Options:__
 `-v` or `--verbose`  
 &nbsp;&nbsp;&nbsp;&nbsp;enable verbose logging  
 `-n` or `--dry-run`  
-&nbsp;&nbsp;&nbsp;&nbsp;print selected IPs but don't initiate SSH connection  
+&nbsp;&nbsp;&nbsp;&nbsp;print selected IPs but don't initiate SSH connection
+`-i` or `--interactive`  
+&nbsp;&nbsp;&nbsp;&nbsp;interactive fuzzy search amongst the instances (requires fzf)  
 `-p` or `--preprod`  
 &nbsp;&nbsp;&nbsp;&nbsp;filter for preprod instances  
 `-P` or `--prod`  

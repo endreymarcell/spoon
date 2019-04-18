@@ -19,7 +19,7 @@ print_help() {
 usage: spoon [flags] [identifier]
 flags:
   -h, --help             display this message and exit
-  -i, --interactive      fuzzy search on all instances (requires fzf)
+  -i, --interactive      interactive fuzzy search amongst the instances (requires fzf)
   -p, --preprod          preprod instances only
   -P, --prod             production instances only
   -1, --first            if there are multiple matching instances, select the first one without a prompt
