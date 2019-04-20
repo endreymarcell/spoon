@@ -166,19 +166,19 @@ execute_ssh() {
     case "$ssh_executable" in
         ssh)
             # shellcheck disable=SC2086
-            ssh -o StrictHostKeyChecking=no -l root $ssh_options
+            ssh -o StrictHostKeyChecking=no -l root $ssh_options || export ssh_failed=1
             ;;
         ssh_with_docker)
             # shellcheck disable=SC2086
-            ssh -o StrictHostKeyChecking=no -l root $ssh_options -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'"
+            ssh -o StrictHostKeyChecking=no -l root $ssh_options -t 'HN=`hostname | cut -f 2 --delimiter=-`; INST_ID=`docker ps | grep $HN-app | cut -f 1 -d " "`; docker exec -ti $INST_ID bash -c '"'"'bash --init-file <(echo ". ../virtualenv/bin/activate")'"'" || export ssh_failed=1
             ;;
         csshx)
             # shellcheck disable=SC2086
-            csshx --ssh_args "$csshx_ssh_args" $ssh_options
+            csshx --ssh_args "$csshx_ssh_args" $ssh_options || export ssh_failed=1
             ;;
         i2cssh)
             # shellcheck disable=SC2086
-            i2cssh -Xl=root $ssh_options
+            i2cssh -Xl=root $ssh_options || export ssh_failed=1
             ;;
     esac
 }

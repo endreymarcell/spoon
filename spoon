@@ -25,6 +25,8 @@ source "${lib_root}/3-filter.bash"
 source "${lib_root}/4-select.bash"
 # shellcheck source=lib/5-ssh.bash
 source "${lib_root}/5-ssh.bash"
+# shellcheck source=lib/6-retry.bash
+source "${lib_root}/6-retry.bash"
 
 spoon_args=( "${@}" )
 spoon_about
@@ -38,3 +40,4 @@ spoon_filter_for_first
 spoon_select_from_multiple
 
 spoon_ssh
+spoon_smart_retry

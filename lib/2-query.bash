@@ -20,6 +20,7 @@ spoon_get_instances() {
         get_instances_from_aws
     else
         spoon_log "reading cache at ${CACHE_FILE_PATH}"
+        export is_using_cache=1
         get_instances_from_cache
     fi
 }
@@ -137,7 +138,7 @@ is_expected_long_query() {
         verbose_log No cache file present, cannot estimate query time.
         return 1
     fi
-    
+
     if is_identifier_instance_id; then
         outdated_cached_nodes_count=$(jq "map(select(.id == \"${identifier}\")) | length" "$CACHE_FILE_PATH")
     else
@@ -148,7 +149,7 @@ is_expected_long_query() {
         verbose_log "This is above the threshold, expecting long-running query."
         return 0
     else
-        verbose_log "This is belove the threshold, expecting quick query."
+        verbose_log "This is below the threshold, expecting quick query."
         return 1
     fi
 }
