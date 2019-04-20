@@ -51,5 +51,5 @@ source "$BATS_TEST_DIRNAME/../lib/0-utils.bash"
     run $spoon foo
 
     assert_success
-    assert_equal_regex "$(mock_get_call_args $mock_ssh_path)" '-o StrictHostKeyChecking=no -J root@9.9.9.9 -l root 2.2.2.2'
+    assert_equal_regex "$(mock_get_call_args $mock_ssh_path)" '-o StrictHostKeyChecking=no -l root -J root@9.9.9.9 2.2.2.2'
 }

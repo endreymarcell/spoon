@@ -6,7 +6,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     mock_set_status $mock_command_path 1
     mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple.json)"
 
-    run $spoon foo <<< '*'
+    run $spoon -V foo <<< '*'
 
     assert_failure
     assert_line "[spoon] please install csshX to SSH to multiple instances (https://github.com/brockgr/csshx)"

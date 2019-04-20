@@ -27,7 +27,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -a foo
 
     assert_success
-    assert_equal_regex "$(mock_get_call_args $mock_csshx_path)" '--ssh_args -J root@9.9.9.9'
+    assert_equal_regex "$(mock_get_call_args $mock_csshx_path)" '-J root@9.9.9.9'
 }
 
 @test "Spoon passes the correct jumphost param to csshx (multiple jumphosts)." {
@@ -37,7 +37,7 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     run $spoon -a foo
 
     assert_success
-    assert_equal_regex "$(mock_get_call_args $mock_csshx_path)" '--ssh_args -J root@9.9.9.9,root@8.8.8.8'
+    assert_equal_regex "$(mock_get_call_args $mock_csshx_path)" '-J root@9.9.9.9,root@8.8.8.8'
 }
 
 @test "Spoon passes the correct jumphost param to i2cssh (single jumphost)." {
