@@ -8,7 +8,7 @@ declare identifier
 spoon_filter_for_environment() {
     if [[ $arg_preprod = 1 ]]; then
         verbose_log filtering for preprod
-        nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp")))')
+        nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp|nonprod")))')
         very_verbose_log "nodes after filtering for preprod:\\n${nodes}"
         node_count=$(echo "${nodes}" | jq '. | length')
         if [[ "${node_count}" -eq 0 ]]; then
@@ -17,7 +17,7 @@ spoon_filter_for_environment() {
         fi
     elif [[ $arg_prod = 1 ]]; then
         verbose_log filtering for prod
-        nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp") | not))')
+        nodes=$(echo "${nodes}" | jq 'map(select(.service | test("preprod|-pp|nonprod") | not))')
         very_verbose_log "nodes after filtering for prod:\\n${nodes}"
         node_count=$(echo "${nodes}" | jq '. | length')
         if [[ "${node_count}" -eq 0 ]]; then

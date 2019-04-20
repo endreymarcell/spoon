@@ -44,6 +44,16 @@ has_long_flag() {
     return 1
 }
 
+get_identifier() {
+    # Grab the one word from a list of words that doesn't begin with a dash.
+    # "-f --foo something --bar -b" --> "something"
+    #
+    # Some people, when confronted with a problem, think
+    # "I know, I'll use regular expressions."
+    # Now they have two problems.
+    echo "$*" | sed 's|-[^ ]* ||g' | sed 's| -[^ ]*||g' | sed 's|^-[^ ]*$||'
+}
+
 is_cache_present() {
     find "$CACHE_FILE_PATH" >/dev/null 2>&1
 }

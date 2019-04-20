@@ -21,6 +21,16 @@ source "$BATS_TEST_DIRNAME/bats-setup.sh"
     assert_equal_regex "$(mock_get_call_args $mock_ssh_path)" '1.1.1.1'
 }
 
+@test "Filtering for prod: order of arguments is irrelevant." {
+    mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple-one-prod-one-preprod.json)"
+
+    run $spoon foo -P
+
+    assert_success
+    assert_equal $(mock_get_call_num $mock_ssh_path) 1
+    assert_equal_regex "$(mock_get_call_args $mock_ssh_path)" '1.1.1.1'
+}
+
 @test "Filtering for prod: multiple instances returned." {
     mock_set_output $mock_aws_path "$(cat $BATS_TEST_DIRNAME/data/multiple-prod-only.json)"
 

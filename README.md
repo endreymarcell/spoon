@@ -12,7 +12,9 @@ brew tap endreymarcell/homebrew-marca
 brew install spoon
 ```
 Requirements: [awscli](https://aws.amazon.com/cli/), [jq](https://stedolan.github.io/jq/)  
-Optional: [csshx](https://github.com/brockgr/csshx) (if you're using Terminal) or [i2cssh](https://github.com/wouterdebie/i2cssh) (if you're using iTerm2)
+Optional:  
+* cluster SSH: [csshx](https://github.com/brockgr/csshx) (if you're using Terminal) or [i2cssh](https://github.com/wouterdebie/i2cssh) (if you're using iTerm2)  
+* interactive mode: [fzf](https://github.com/junegunn/fzf)  
 
 ## Usage
 
@@ -42,9 +44,47 @@ __Options:__
 `-w` or `--no-cache-write`  
 &nbsp;&nbsp;&nbsp;&nbsp;don't cache instances  
 
+Single-letter options can be combined, ie. you can write `spoon -1pd` instead of `spoon -1 -p -d`.  
+
 __Identifier:__  
 If the identifier starts with `i-`, it is recognised as an instence-id. Otherwise, it's taken to be a service name, or at least part of it.  
 If no identifier is passed, interactive mode is assumed.  
+
+## Accessing nodes inside VPC
+
+If the nodes you want to access are inside a VPC you need to specify your _VPC jump host(s)_.  
+A jump host is a node that is accessible from the internet and can access the VPC,
+effectively acting as a bridge between the two networks.
+
+To do that you have to add these lines to your `~/.spoon/config.json` file:
+```json
+{
+  "vpcJumphosts": {
+    "<VPC-ID>": [
+      "<<Jump-Host-Ip-1>>",
+      "<<Jump-Host-Ip-2>>"
+    ]
+  }
+}
+```
+
+Example:
+```json
+{
+  "vpcJumphosts": {
+    "vpc-abcd1234": [
+      "1.2.3.4"
+    ],
+    "vpc-asdfasdf": [
+      "1.2.3.4",
+      "200.171.41.43"
+    ],
+    "vpc-ABCDEFGH": [
+      "52.23.42.184"
+    ]
+  }
+}
+```
 
 ## Contribution
 Pull requests are welcome.  
