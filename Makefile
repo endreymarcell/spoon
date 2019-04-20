@@ -1,4 +1,10 @@
-.PHONY: test debug lint
+.PHONY: develop test debug lint
+
+develop:
+	git submodule init
+	git submodule update
+	make test
+	make lint
 
 test:
 	docker run --rm -t -v "${PWD}:/spoon" endreymarca/bats-ext
