@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.4.0
+2019.04.21.
+- Inform the user about estimated long-running AWS queries for better UX
+- Identifier can be any of the arguments, support older bash versions
+- Add suport for 'nonprod' instances
+- Better handling of dry run: should stop right before calling SSH, not earlier
+- Smart retry: if SSH fails after reading the cache, assume the cache is wrong and retry by querying AWS
+- Minor logging improvements
+
 ## v2.3.2
 2019.02.06.
 - Fix lib file sourcing even better so that spoon actually works after brew install.
